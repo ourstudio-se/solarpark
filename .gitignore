@@ -1,0 +1,6 @@
+*.pyc
+__pycache__
+.coverage
+.vscode/
+dev.env
+deploy/overlays/**/secret.yaml
