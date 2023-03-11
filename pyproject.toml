@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "solarpark-service"
+version = "0.0.1"
+description = "Solar Park"
+authors = ["Our Studio <hej@ourstudio.se>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+certifi = "^2022.12.7"
+cryptography = "39.0.1"
+fastapi = "0.92.0"
+httpx = "0.23.3"
+pydantic = "1.10.2"
+python-json-logger = "2.0.4"
+setuptools = "^65.5.1"
+SQLAlchemy = "2.0.4"
+psycopg2 = "2.9.5"
+structlog = "22.1.0"
+uvicorn = "0.20.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "7.2.0"
+pre-commit = "^2.20.0"
+
+[build-system]
+requires = ["poetry>=1.2.2"]
+build-backend = "poetry.masonry.api"
