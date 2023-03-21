@@ -4,12 +4,22 @@ from solarpark.models.members import MemberCreateRequest, MemberUpdateRequest
 from solarpark.persistence.models.members import Member
 
 
+def find_member(db: Session, term: str):
+    return db.query(Member).filter(Member.firstname.ilike(f"%{term}%") | Member.lastname.ilike(f"%{term}%")).all()
+
+
 def get_member(db: Session, member_id: int):
     return db.query(Member).filter(Member.id == member_id).first()
 
 
 def get_all_members(db: Session):
     return db.query(Member).all()
+
+
+def count_all_members(db: Session, filter_on_org: bool = False):
+    if filter_on_org:
+        return db.query(Member).filter(Member.org_number is not None).count()
+    return db.query(Member).count()
 
 
 def update_member(db: Session, member_id: int, member_update: MemberUpdateRequest):

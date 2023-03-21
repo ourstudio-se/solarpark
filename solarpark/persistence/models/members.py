@@ -12,6 +12,7 @@ class Member(Base):
     lastname = Column(String)
     year = Column(Integer)
     birth_date = Column(Integer)
+    org_number = Column(String, nullable=True)
     street_address = Column(String)
     zip_code = Column(Integer)
     telephone = Column(String, nullable=True)

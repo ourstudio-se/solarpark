@@ -8,18 +8,19 @@ from solarpark.models.shares import Share
 
 class Member(BaseModel):
     id: int
+    bank: Optional[str]
+    birth_date: int
+    created_at: datetime
+    email: str
     firstname: str
     lastname: str
-    year: int
-    birth_date: int
+    org_number: Optional[str]
     street_address: str
-    zip_code: int
-    telephone: Optional[str]
-    email: str
-    bank: Optional[str]
     swish: Optional[str]
-    created_at: datetime
+    telephone: Optional[str]
     updated_at: Optional[datetime]
+    year: int
+    zip_code: int
 
     class Config:
         orm_mode = True
@@ -34,29 +35,31 @@ class MemberWithShares(Member):
 
 class MemberCreateRequest(BaseModel):
     id: int
+    bank: Optional[str]
+    birth_date: int
+    email: str
     firstname: str
     lastname: str
-    year: int
-    birth_date: int
+    org_number: Optional[str]
     street_address: str
-    zip_code: int
-    telephone: Optional[str]
-    email: str
-    bank: Optional[str]
     swish: Optional[str]
+    telephone: Optional[str]
+    year: int
+    zip_code: int
 
 
 class MemberUpdateRequest(BaseModel):
+    bank: Optional[str]
+    birth_date: int
+    email: str
     firstname: str
     lastname: str
-    year: int
-    birth_date: int
+    org_number: Optional[str]
     street_address: str
-    zip_code: int
-    telephone: Optional[str]
-    email: str
-    bank: Optional[str]
     swish: Optional[str]
+    telephone: Optional[str]
+    year: int
+    zip_code: int
 
 
 class Members(BaseModel):

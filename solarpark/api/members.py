@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -5,7 +7,14 @@ from sqlalchemy.orm import Session
 from solarpark.api import parse_integrity_error_msg
 from solarpark.models.members import Member, MemberCreateRequest, Members, MemberUpdateRequest, MemberWithShares
 from solarpark.persistence.database import get_db
-from solarpark.persistence.members import create_member, delete_member, get_all_members, get_member, update_member
+from solarpark.persistence.members import (
+    create_member,
+    delete_member,
+    find_member,
+    get_all_members,
+    get_member,
+    update_member,
+)
 from solarpark.persistence.shares import delete_shares_by_member, get_shares_by_member
 
 router = APIRouter()
@@ -23,6 +32,11 @@ async def get_member_endpoint(member_id: int, db: Session = Depends(get_db)) -> 
         member.shares = shares
 
     return member
+
+
+@router.get("/members/search/{term}", summary="Search for member")
+async def search_members_endpoint(term: str, db: Session = Depends(get_db)) -> List[Member]:
+    return find_member(db, term)
 
 
 @router.get("/members", summary="Get all members")

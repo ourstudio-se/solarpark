@@ -12,6 +12,12 @@ def get_shares_by_member(db: Session, member_id: int):
     return db.query(Share).filter(Share.member_id == member_id).all()
 
 
+def count_all_shares(db: Session, filter_on_org: bool = False):
+    if filter_on_org:
+        return db.query(Share).filter(Share.org_number is not None).count()
+    return db.query(Share).count()
+
+
 def delete_shares_by_member(db: Session, member_id: int):
     deleted = db.query(Share).filter(Share.member_id == member_id).delete()
     if deleted == 1:
