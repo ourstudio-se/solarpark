@@ -29,7 +29,8 @@ async def get_analytics_endpoint(db: Session = Depends(get_db)):
 
     return {
         "members": {
-            "private_persons": all_members,
+            "total_count": all_members,
+            "private_persons": all_members - all_member_organizations,
             "organizations": all_member_organizations,
         },
         "shares": {

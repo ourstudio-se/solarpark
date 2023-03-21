@@ -1,3 +1,5 @@
+# pylint: disable=singleton-comparison
+
 from sqlalchemy.orm import Session
 
 from solarpark.models.shares import ShareCreateRequest
@@ -14,7 +16,7 @@ def get_shares_by_member(db: Session, member_id: int):
 
 def count_all_shares(db: Session, filter_on_org: bool = False):
     if filter_on_org:
-        return db.query(Share).filter(Share.org_number is not None).count()
+        return db.query(Share).filter(Share.org_number != None).count()  # noqa: E711
     return db.query(Share).count()
 
 

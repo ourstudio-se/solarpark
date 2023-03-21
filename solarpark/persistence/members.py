@@ -1,3 +1,4 @@
+# pylint: disable=singleton-comparison
 from sqlalchemy.orm import Session
 
 from solarpark.models.members import MemberCreateRequest, MemberUpdateRequest
@@ -18,7 +19,7 @@ def get_all_members(db: Session):
 
 def count_all_members(db: Session, filter_on_org: bool = False):
     if filter_on_org:
-        return db.query(Member).filter(Member.org_number is not None).count()
+        return db.query(Member).filter(Member.org_number != None).count()  # noqa: E711
     return db.query(Member).count()
 
 
