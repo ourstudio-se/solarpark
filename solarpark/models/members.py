@@ -9,18 +9,19 @@ from solarpark.models.shares import Share
 class Member(BaseModel):
     id: int
     bank: Optional[str]
-    birth_date: int
+    birth_date: Optional[int]
     created_at: datetime
-    email: str
-    firstname: str
-    lastname: str
+    email: Optional[str]
+    firstname: Optional[str]
+    lastname: Optional[str]
+    company_name: Optional[str]
     org_number: Optional[str]
-    street_address: str
+    street_address: Optional[str]
     swish: Optional[str]
     telephone: Optional[str]
     updated_at: Optional[datetime]
-    year: int
-    zip_code: int
+    year: Optional[int]
+    zip_code: Optional[int]
 
     class Config:
         orm_mode = True
@@ -36,10 +37,11 @@ class MemberWithShares(Member):
 class MemberCreateRequest(BaseModel):
     id: int
     bank: Optional[str]
-    birth_date: int
+    birth_date: Optional[int]
     email: str
-    firstname: str
-    lastname: str
+    firstname: Optional[str]
+    lastname: Optional[str]
+    org_name: Optional[str]
     org_number: Optional[str]
     street_address: str
     swish: Optional[str]
@@ -50,20 +52,22 @@ class MemberCreateRequest(BaseModel):
 
 class MemberUpdateRequest(BaseModel):
     bank: Optional[str]
-    birth_date: int
-    email: str
-    firstname: str
-    lastname: str
+    birth_date: Optional[int]
+    email: Optional[str]
+    firstname: Optional[str]
+    lastname: Optional[str]
+    org_name: Optional[str]
     org_number: Optional[str]
-    street_address: str
+    street_address: Optional[str]
     swish: Optional[str]
     telephone: Optional[str]
-    year: int
-    zip_code: int
+    year: Optional[int]
+    zip_code: Optional[int]
 
 
 class Members(BaseModel):
-    members: List[Member]
+    data: List[Member]
+    total: int
 
     class Config:
         orm_mode = True

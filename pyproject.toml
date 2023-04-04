@@ -6,6 +6,7 @@ authors = ["Our Studio <hej@ourstudio.se>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+python-multipart = "0.0.6"
 certifi = "^2022.12.7"
 cryptography = "39.0.1"
 fastapi = "0.92.0"

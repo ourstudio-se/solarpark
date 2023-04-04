@@ -1,4 +1,7 @@
-# pylint: disable=singleton-comparison
+# pylint: disable=singleton-comparison,W0622
+from typing import Dict, List
+
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from solarpark.models.members import MemberCreateRequest, MemberUpdateRequest
@@ -6,15 +9,39 @@ from solarpark.persistence.models.members import Member
 
 
 def find_member(db: Session, term: str):
-    return db.query(Member).filter(Member.firstname.ilike(f"%{term}%") | Member.lastname.ilike(f"%{term}%")).all()
+    result = db.query(Member).filter(Member.firstname.ilike(f"%{term}%") | Member.lastname.ilike(f"%{term}%")).all()
+    return {"data": result, "total": len(result)}
 
 
 def get_member(db: Session, member_id: int):
-    return db.query(Member).filter(Member.id == member_id).first()
+    result = db.query(Member).filter(Member.id == member_id).all()
+    return {"data": result, "total": len(result)}
 
 
-def get_all_members(db: Session):
-    return db.query(Member).all()
+# page1 = Employee.query.paginate(page=1, per_page=2)
+def get_all_members(db: Session, sort: List, range: List) -> Dict:
+    total_count = db.query(Member).count()
+    # pages = math.ceil(int(total_count) / per_page)
+
+    # Pagination and sort order
+    if len(range) == 2 and len(sort) == 2:
+        return {
+            "data": db.query(Member)
+            .order_by(text(f"{sort[0]} {sort[1].lower()}"))
+            .offset(range[0])
+            .limit(range[1])
+            .all(),
+            "total": total_count,
+        }
+
+    # Pagination only
+    if len(range) == 2:
+        return {
+            "data": db.query(Member).order_by(Member.id).offset(range[0]).limit(range[1]).all(),
+            "total": total_count,
+        }
+
+    return {"data": db.query(Member).order_by(Member.id).offset(0).limit(10).all(), "total": total_count}
 
 
 def count_all_members(db: Session, filter_on_org: bool = False):
