@@ -18,10 +18,8 @@ def get_member(db: Session, member_id: int):
     return {"data": result, "total": len(result)}
 
 
-# page1 = Employee.query.paginate(page=1, per_page=2)
 def get_all_members(db: Session, sort: List, range: List) -> Dict:
     total_count = db.query(Member).count()
-    # pages = math.ceil(int(total_count) / per_page)
 
     # Pagination and sort order
     if len(range) == 2 and len(sort) == 2:
