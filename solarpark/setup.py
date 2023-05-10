@@ -6,6 +6,7 @@ from solarpark.logging import get_logger
 
 
 def add_routes(app) -> None:
+
     app.include_router(
         members.router,
         tags=["members"],

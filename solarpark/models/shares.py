@@ -18,6 +18,11 @@ class Share(BaseModel):
         orm_mode = True
 
 
+class ShareResponse(BaseModel):
+    data: List[Share]
+    total: int
+
+
 class ShareCreateRequest(BaseModel):
     id: int
     comment: Optional[str]
