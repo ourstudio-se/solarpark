@@ -23,6 +23,11 @@ class ShareResponse(BaseModel):
     total: int
 
 
+class ShareResponseTest(Share):
+    class Config:
+        orm_mode = True
+
+
 class ShareCreateRequest(BaseModel):
     id: int
     comment: Optional[str]
@@ -38,3 +43,13 @@ class Shares(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class ShareUpdateRequest(BaseModel):
+    comment: Optional[str]
+    created_at: datetime
+    updated_at: Optional[datetime]
+    date: int
+    member_id: int
+    initial_value: int
+    current_value: int

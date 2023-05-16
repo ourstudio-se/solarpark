@@ -5,7 +5,7 @@ from typing import Dict, List
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from solarpark.models.shares import ShareCreateRequest
+from solarpark.models.shares import ShareCreateRequest, ShareUpdateRequest
 from solarpark.persistence.models.shares import Share
 
 
@@ -69,3 +69,9 @@ def create_share(db: Session, share_request: ShareCreateRequest):
     db.commit()
     db.refresh(share)
     return share
+
+
+def update_share(db: Session, share_id: int, share_update: ShareUpdateRequest):
+    db.query(Share).filter(Share.id == share_id).update(share_update.dict())
+    db.commit()
+    return db.query(Share).filter(Share.id == share_id).first()

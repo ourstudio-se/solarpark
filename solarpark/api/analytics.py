@@ -11,11 +11,11 @@ router = APIRouter()
 @router.get("/analytics", summary="Get analytical data")
 async def get_analytics_endpoint(db: Session = Depends(get_db)):
     """
-    1. totalt antal medlemmar som äger andelar
-    2. Totalt antal företag som äger andelar
+    1. totalt antal medlemmar som äger andelar          # KLAR
+    2. Totalt antal företag som äger andelar            # KLAR
     3. Totalt antal företag med fler än 1 andel
-    4. totalt antal andelar
-    5. summa instats (andelar * 3000) (kr)
+    4. totalt antal andelar                             # KLAR
+    5. summa instats (andelar * 3000) (kr)              # KLAR
     6. totalt utdelat/återbetalat (kr)
     7. Totalt utbetalt för året (kr)
     8. Totalt värde konton (kr)

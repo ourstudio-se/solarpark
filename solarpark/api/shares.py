@@ -7,16 +7,17 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from solarpark.api import parse_integrity_error_msg
-from solarpark.models.shares import Share, ShareCreateRequest, ShareResponse, Shares
+from solarpark.models.shares import Share, ShareCreateRequest, Shares, ShareUpdateRequest
 from solarpark.persistence.database import get_db
-from solarpark.persistence.shares import create_share, get_all_shares, get_share, get_shares_by_member
+from solarpark.persistence.shares import create_share, get_all_shares, get_share, get_shares_by_member, update_share
 
 router = APIRouter()
 
 
 @router.get("/shares/{share_id}", summary="Get specific share")
-async def get_share_endpoint(share_id: int = 2, db: Session = Depends(get_db)) -> ShareResponse:
-    share = get_share(db, share_id)
+async def get_share_endpoint(share_id: int, db: Session = Depends(get_db)) -> Share:
+    share = get_share(db, share_id)["data"][0]
+
     if not share:
         raise HTTPException(status_code=404, detail="share not found")
     return share
@@ -64,3 +65,22 @@ async def create_share_endpoint(share_request: ShareCreateRequest, db: Session =
                 status_code=400, detail=parse_integrity_error_msg("Key (.*?) not present", str(ex))
             ) from ex
     raise HTTPException(status_code=400, detail="error creating share")
+
+
+# SIMON FÖRSÖKER FIXA UPDATE SHARE
+
+
+@router.put("/shares/{share_id}", summary="Update share")
+async def update_member_endpoint(
+    share_id: int, share_request: ShareUpdateRequest, db: Session = Depends(get_db)
+) -> Share:
+    try:
+        return update_share(db, share_id, share_request)
+    except IntegrityError as ex:
+        if "UniqueViolation" in str(ex):
+            raise HTTPException(status_code=400, detail=parse_integrity_error_msg("Key (.*?) exists", str(ex))) from ex
+        if "violates foreign key" in str(ex):
+            raise HTTPException(
+                status_code=400, detail=parse_integrity_error_msg("Key (.*?) not present", str(ex))
+            ) from ex
+        raise HTTPException(status_code=400, detail="error updating share") from ex

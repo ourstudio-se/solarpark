@@ -1,6 +1,6 @@
 from fastapi import Depends
 
-from solarpark.api import admin, analytics, hooks, members, shares
+from solarpark.api import admin, analytics, hooks, leads, members, shares
 from solarpark.authentication import api_security
 from solarpark.logging import get_logger
 
@@ -30,5 +30,10 @@ def add_routes(app) -> None:
     app.include_router(
         hooks.router,
         tags=["hooks"],
+        dependencies=[Depends(get_logger), Depends(api_security)],
+    )
+    app.include_router(
+        leads.router,
+        tags=["leads"],
         dependencies=[Depends(get_logger), Depends(api_security)],
     )
