@@ -30,7 +30,7 @@ def add_routes(app) -> None:
     app.include_router(
         hooks.router,
         tags=["hooks"],
-        dependencies=[Depends(get_logger), Depends(api_security)],
+        dependencies=[Depends(get_logger)],
     )
     app.include_router(
         leads.router,
