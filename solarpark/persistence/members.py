@@ -38,8 +38,11 @@ def get_all_members(db: Session, sort: List, range: List) -> Dict:
             "data": db.query(Member).order_by(Member.id).offset(range[0]).limit(range[1]).all(),
             "total": total_count,
         }
-
-    return {"data": db.query(Member).order_by(Member.id).offset(0).limit(10).all(), "total": total_count}
+    # "data": db.query(Member).order_by(Member.id).offset(0).limit(10).all()
+    return {
+        "data": db.query(Member).order_by(Member.id).offset(0).limit(10).all(),
+        "total": total_count,
+    }
 
 
 def count_all_members(db: Session, filter_on_org: bool = False):
@@ -64,7 +67,6 @@ def delete_member(db: Session, member_id: int) -> bool:
 
 def create_member(db: Session, member_request: MemberCreateRequest):
     member = Member(
-        id=member_request.id,
         firstname=member_request.firstname,
         lastname=member_request.lastname,
         year=member_request.year,

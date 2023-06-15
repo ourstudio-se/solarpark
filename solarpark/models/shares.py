@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel
@@ -7,12 +6,10 @@ from pydantic import BaseModel
 class Share(BaseModel):
     id: int
     comment: Optional[str]
-    created_at: datetime
-    updated_at: Optional[datetime]
-    date: int
+    date: Optional[int]
     member_id: int
     initial_value: int
-    current_value: int
+    current_value: Optional[int]
 
     class Config:
         orm_mode = True
@@ -23,12 +20,7 @@ class ShareResponse(BaseModel):
     total: int
 
 
-class ShareResponseTest(Share):
-    class Config:
-        orm_mode = True
-
-
-class ShareCreateRequest(BaseModel):
+class ShareCreateRequest_csv(BaseModel):
     id: int
     comment: Optional[str]
     date: int
@@ -47,9 +39,14 @@ class Shares(BaseModel):
 
 class ShareUpdateRequest(BaseModel):
     comment: Optional[str]
-    created_at: datetime
-    updated_at: Optional[datetime]
-    date: int
+    date: Optional[int]
+    member_id: int
+    initial_value: Optional[int]
+    current_value: Optional[int]
+
+
+class ShareCreateRequest(BaseModel):
+    comment: Optional[str]
+    date: Optional[int]
     member_id: int
     initial_value: int
-    current_value: int

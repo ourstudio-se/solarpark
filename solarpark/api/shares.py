@@ -25,7 +25,10 @@ async def get_share_endpoint(share_id: int, db: Session = Depends(get_db)) -> Sh
 
 @router.get("/shares", summary="Get shares")
 async def get_shares_endpoint(
-    range: str | None = None, sort: str | None = None, filter: str | None = None, db: Session = Depends(get_db)
+    range: str | None = None,
+    sort: str | None = None,
+    filter: str | None = None,
+    db: Session = Depends(get_db),
 ) -> Shares:
     try:
         filter_obj = {}
@@ -59,15 +62,16 @@ async def create_share_endpoint(share_request: ShareCreateRequest, db: Session =
         return create_share(db, share_request)
     except IntegrityError as ex:
         if "UniqueViolation" in str(ex):
-            raise HTTPException(status_code=400, detail=parse_integrity_error_msg("Key (.*?) exists", str(ex))) from ex
+            raise HTTPException(
+                status_code=400,
+                detail=parse_integrity_error_msg("Key (.*?) exists", str(ex)),
+            ) from ex
         if "violates foreign key" in str(ex):
             raise HTTPException(
-                status_code=400, detail=parse_integrity_error_msg("Key (.*?) not present", str(ex))
+                status_code=400,
+                detail=parse_integrity_error_msg("Key (.*?) not present", str(ex)),
             ) from ex
     raise HTTPException(status_code=400, detail="error creating share")
-
-
-# SIMON FÖRSÖKER FIXA UPDATE SHARE
 
 
 @router.put("/shares/{share_id}", summary="Update share")
@@ -78,9 +82,13 @@ async def update_member_endpoint(
         return update_share(db, share_id, share_request)
     except IntegrityError as ex:
         if "UniqueViolation" in str(ex):
-            raise HTTPException(status_code=400, detail=parse_integrity_error_msg("Key (.*?) exists", str(ex))) from ex
+            raise HTTPException(
+                status_code=400,
+                detail=parse_integrity_error_msg("Key (.*?) exists", str(ex)),
+            ) from ex
         if "violates foreign key" in str(ex):
             raise HTTPException(
-                status_code=400, detail=parse_integrity_error_msg("Key (.*?) not present", str(ex))
+                status_code=400,
+                detail=parse_integrity_error_msg("Key (.*?) not present", str(ex)),
             ) from ex
         raise HTTPException(status_code=400, detail="error updating share") from ex

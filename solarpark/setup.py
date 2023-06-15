@@ -6,7 +6,6 @@ from solarpark.logging import get_logger
 
 
 def add_routes(app) -> None:
-
     app.include_router(
         members.router,
         tags=["members"],
@@ -18,13 +17,8 @@ def add_routes(app) -> None:
         dependencies=[Depends(get_logger), Depends(api_security)],
     )
     app.include_router(
-        analytics.router,
-        tags=["analytics"],
-        dependencies=[Depends(get_logger), Depends(api_security)],
-    )
-    app.include_router(
-        admin.router,
-        tags=["admin"],
+        leads.router,
+        tags=["leads"],
         dependencies=[Depends(get_logger), Depends(api_security)],
     )
     app.include_router(
@@ -33,7 +27,12 @@ def add_routes(app) -> None:
         dependencies=[Depends(get_logger)],
     )
     app.include_router(
-        leads.router,
-        tags=["leads"],
+        analytics.router,
+        tags=["analytics"],
+        dependencies=[Depends(get_logger), Depends(api_security)],
+    )
+    app.include_router(
+        admin.router,
+        tags=["admin"],
         dependencies=[Depends(get_logger), Depends(api_security)],
     )

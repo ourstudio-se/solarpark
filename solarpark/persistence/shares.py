@@ -5,7 +5,7 @@ from typing import Dict, List
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from solarpark.models.shares import ShareCreateRequest, ShareUpdateRequest
+from solarpark.models.shares import ShareCreateRequest, ShareCreateRequest_csv, ShareUpdateRequest
 from solarpark.persistence.models.shares import Share
 
 
@@ -27,9 +27,15 @@ def get_all_shares(db: Session, sort: List, range: List) -> Dict:
 
     # Pagination only
     if len(range) == 2:
-        return {"data": db.query(Share).order_by(Share.id).offset(range[0]).limit(range[1]).all(), "total": total_count}
+        return {
+            "data": db.query(Share).order_by(Share.id).offset(range[0]).limit(range[1]).all(),
+            "total": total_count,
+        }
 
-    return {"data": db.query(Share).order_by(Share.id).offset(0).limit(10).all(), "total": total_count}
+    return {
+        "data": db.query(Share).order_by(Share.id).offset(0).limit(10).all(),
+        "total": total_count,
+    }
 
 
 def get_share(db: Session, share_id: int):
@@ -56,7 +62,7 @@ def delete_shares_by_member(db: Session, member_id: int):
     return False
 
 
-def create_share(db: Session, share_request: ShareCreateRequest):
+def create_share_csv(db: Session, share_request: ShareCreateRequest_csv):
     share = Share(
         id=share_request.id,
         member_id=share_request.member_id,
@@ -64,6 +70,20 @@ def create_share(db: Session, share_request: ShareCreateRequest):
         current_value=share_request.current_value,
         date=share_request.date,
         comment=share_request.comment,
+    )
+    db.add(share)
+    db.commit()
+    db.refresh(share)
+    return share
+
+
+def create_share(db: Session, share_request: ShareCreateRequest):
+    share = Share(
+        comment=share_request.comment,
+        date=share_request.date,
+        member_id=share_request.member_id,
+        initial_value=share_request.initial_value,
+        current_value=share_request.initial_value,
     )
     db.add(share)
     db.commit()

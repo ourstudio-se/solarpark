@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel
@@ -6,31 +5,19 @@ from pydantic import BaseModel
 
 class Lead(BaseModel):
     id: int
-    firstname: Optional[str]  # Optional p.g.a. samma fält för namn och företagsnamn hos solarpark.
-    lastname: Optional[str]
-    birth_date: Optional[int]
-    company_name: Optional[str]
-    org_number: Optional[int]
-    street_address: str
-    zip_code: int
-    locality: str
-    email: str
-    telephone: int
-    existing_id: int
-    quantity_shares: int
-    generate_certificate: bool
-    created_at: datetime
-
-    # Gammal modell för dummy data
-    """ id: int
-    birth_date: Optional[int]
-    created_at: datetime
-    email: Optional[str]
     firstname: Optional[str]
     lastname: Optional[str]
+    birth_date: Optional[int]
     company_name: Optional[str]
     org_number: Optional[str]
-    shares: int """
+    street_address: Optional[str]
+    zip_code: Optional[str]
+    locality: Optional[str]
+    email: Optional[str]
+    telephone: Optional[str]
+    existing_id: int
+    quantity_shares: int
+    generate_certificate: Optional[bool] = False
 
     class Config:
         orm_mode = True
@@ -45,18 +32,32 @@ class Leads(BaseModel):
 
 
 class LeadCreateRequest(BaseModel):
-    id: int
-    firstname: Optional[str]  # Optional p.g.a. samma fält för namn och företagsnamn hos solarpark.
+    firstname: Optional[str]
+    lastname: Optional[str]
+    birth_date: Optional[int]
+    company_name: Optional[str]
+    org_number: Optional[str]
+    street_address: Optional[str]
+    zip_code: Optional[str]
+    locality: Optional[str]
+    email: Optional[str]
+    telephone: Optional[str]
+    existing_id: int
+    quantity_shares: int
+    generate_certificate: bool = False
+
+
+class LeadUpdateRequest(BaseModel):
+    firstname: Optional[str]
     lastname: Optional[str]
     birth_date: Optional[int]
     company_name: Optional[str]
     org_number: Optional[int]
-    street_address: str
-    zip_code: int
-    locality: str
-    email: str
-    telephone: int
-    existing_id: int
+    street_address: Optional[str]
+    zip_code: Optional[int]
+    locality: Optional[str]
+    email: Optional[str]
+    telephone: Optional[int]
+    existing_id: Optional[int]
     quantity_shares: int
-    generate_certificate: bool
-    created_at: datetime
+    generate_certificate: Optional[bool]
