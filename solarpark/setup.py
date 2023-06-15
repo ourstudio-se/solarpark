@@ -24,7 +24,7 @@ def add_routes(app) -> None:
     app.include_router(
         hooks.router,
         tags=["hooks"],
-        dependencies=[Depends(get_logger)],
+        dependencies=[Depends(get_logger), Depends(api_security)],
     )
     app.include_router(
         analytics.router,
