@@ -3,7 +3,8 @@ FROM python:3.10-alpine3.16
 RUN apk update && \
     apk upgrade --no-cache && \
     apk add --no-cache \
-    build-base postgresql-dev gcc openssl-dev openssl curl sqlite-libs>=3.40.1-r0
+    build-base postgresql-dev gcc openssl-dev openssl curl sqlite-libs>=3.40.1-r0 \
+    apk add wkhtmltopdf
 
 WORKDIR /app
 
@@ -14,6 +15,7 @@ RUN pip install --upgrade pip && pip install wheel>=0.38.4 && pip install -r req
 ADD ./ .
 
 ENV PYTHONPATH "#{PYTHONPATH}:/app"
+
 
 RUN addgroup \
     --gid 1000 \

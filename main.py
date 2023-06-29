@@ -15,12 +15,9 @@ app = FastAPI(title="solarpark-service", description="Solar Park", root_path=set
 
 add_routes(app)
 
-# origins = ["*"]
+
 origins = [
-    "http://localhost",
-    "http://localhost:8000",
     "http://localhost:5173",
-    "http://localhost:5173/leads",
 ]
 
 app.add_middleware(

@@ -44,7 +44,10 @@ async def search_members_endpoint(term: str, db: Session = Depends(get_db)):
 
 @router.get("/members", summary="Get all members")
 async def get_members_endpoint(
-    range: str | None = None, sort: str | None = None, filter: str | None = None, db: Session = Depends(get_db)
+    range: str | None = None,
+    sort: str | None = None,
+    filter: str | None = None,
+    db: Session = Depends(get_db),
 ) -> Members:
     try:
         filter_obj = {}
@@ -78,10 +81,14 @@ async def update_member_endpoint(
         return update_member(db, member_id, member_request)
     except IntegrityError as ex:
         if "UniqueViolation" in str(ex):
-            raise HTTPException(status_code=400, detail=parse_integrity_error_msg("Key (.*?) exists", str(ex))) from ex
+            raise HTTPException(
+                status_code=400,
+                detail=parse_integrity_error_msg("Key (.*?) exists", str(ex)),
+            ) from ex
         if "violates foreign key" in str(ex):
             raise HTTPException(
-                status_code=400, detail=parse_integrity_error_msg("Key (.*?) not present", str(ex))
+                status_code=400,
+                detail=parse_integrity_error_msg("Key (.*?) not present", str(ex)),
             ) from ex
         raise HTTPException(status_code=400, detail="error updating member") from ex
 
@@ -92,10 +99,14 @@ async def create_member_endpoint(member_request: MemberCreateRequest, db: Sessio
         return create_member(db, member_request)
     except IntegrityError as ex:
         if "UniqueViolation" in str(ex):
-            raise HTTPException(status_code=400, detail=parse_integrity_error_msg("Key (.*?) exists", str(ex))) from ex
+            raise HTTPException(
+                status_code=400,
+                detail=parse_integrity_error_msg("Key (.*?) exists", str(ex)),
+            ) from ex
         if "violates foreign key" in str(ex):
             raise HTTPException(
-                status_code=400, detail=parse_integrity_error_msg("Key (.*?) not present", str(ex))
+                status_code=400,
+                detail=parse_integrity_error_msg("Key (.*?) not present", str(ex)),
             ) from ex
         raise HTTPException(status_code=400, detail="error creating member") from ex
 
