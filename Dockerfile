@@ -3,8 +3,7 @@ FROM python:3.10-alpine3.16
 RUN apk update && \
     apk upgrade --no-cache && \
     apk add --no-cache \
-    build-base postgresql-dev gcc openssl-dev openssl curl sqlite-libs>=3.40.1-r0 \
-
+    build-base postgresql-dev gcc openssl-dev openssl curl sqlite-libs>=3.40.1-r0 
 WORKDIR /app
 
 COPY requirements.txt requirements.txt
