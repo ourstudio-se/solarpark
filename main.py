@@ -2,6 +2,7 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
+from solarpark.authentication import api_security
 from solarpark.logging import log_config
 from solarpark.persistence.database import Base, engine
 from solarpark.settings import settings
@@ -41,4 +42,10 @@ async def add_process_time_header(request: Request, call_next):
 
 
 if __name__ == "__main__":
+    # Override security when run locally, this will not run when deployed.
+    def fake_auth():
+        pass
+
+    app.dependency_overrides[api_security] = fake_auth
+
     uvicorn.run(app)

@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     API_AUDIENCE: str = "https://solarpark.authentication.com"
     ISSUER: str = "https://solarpark.eu.auth0.com/"
     ALGORITHMS: str = "RS256"
+    SENDGRID_API_KEY: str
     MAIL_USERNAME: str = "simonhamberg93"
     MAIL_PASSWORD: str = "unkuwcrotytvhfbr"
     MAIL_FROM: str = "simonhamberg93@gmail.com"
