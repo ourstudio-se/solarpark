@@ -17,7 +17,7 @@ app = FastAPI(title="solarpark-service", description="Solar Park", root_path=set
 add_routes(app)
 
 
-origins = ["http://localhost:5173", "https://solarpark-test-env.netlify.app/"]
+origins = ["http://localhost:5173", "https://solarpark-test-env.netlify.app/", "https://solarpark-test-env.netlify.app"]
 
 app.add_middleware(
     CORSMiddleware,
