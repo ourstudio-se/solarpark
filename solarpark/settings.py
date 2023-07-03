@@ -10,12 +10,6 @@ class Settings(BaseSettings):
     ISSUER: str = "https://solarpark.eu.auth0.com/"
     ALGORITHMS: str = "RS256"
     SENDGRID_API_KEY: str
-    MAIL_USERNAME: str = "simonhamberg93"
-    MAIL_PASSWORD: str = "unkuwcrotytvhfbr"
-    MAIL_FROM: str = "simonhamberg93@gmail.com"
-    MAIL_PORT: int = 587
-    MAIL_SERVER: str = "smtp.gmail.com"
-    MAIL_FROM_NAME: str = "Solarpark"
 
 
 settings = Settings()
