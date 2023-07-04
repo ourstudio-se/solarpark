@@ -1,3 +1,5 @@
+import os
+
 import pdfkit
 from fastapi import APIRouter, Depends, HTTPException, Response
 from jinja2 import Environment, FileSystemLoader
@@ -10,12 +12,18 @@ from solarpark.persistence.shares import get_shares_by_member
 router = APIRouter()
 
 
+def get_image_path():
+    path = f"{os.getcwd()}/solarpark/templates/solarparkPDF.png"
+    return path
+
+
 def generate_certificate_pdf(member, shares):
     context = {
         "title": "Test Solarpark",
         "id": member.id,
         "name": f"{member.firstname} {member.lastname}",
         "shares": [{"id": share.id} for share in shares],
+        "image_path": get_image_path(),
     }
 
     env = Environment(loader=FileSystemLoader("solarpark/templates/"))
