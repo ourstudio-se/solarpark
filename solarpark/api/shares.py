@@ -13,6 +13,8 @@ from solarpark.persistence.shares import create_share, get_all_shares, get_share
 
 router = APIRouter()
 
+# IMPLEMENTERA DELETE SHARE
+
 
 @router.get("/shares/{share_id}", summary="Get specific share")
 async def get_share_endpoint(share_id: int, db: Session = Depends(get_db)) -> Share:

@@ -11,7 +11,7 @@ class Share(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement="auto")
     member_id = Column(Integer, ForeignKey("members.id"), nullable=False)
-    date = Column(Integer, nullable=False)
+    date = Column(Integer, nullable=False)  # kanske string iställt och använda datetime.now().strftime("%Y-%m-%d")
     comment = Column(String, nullable=True)
     initial_value = Column(Integer, nullable=False)
     current_value = Column(Integer, nullable=False)

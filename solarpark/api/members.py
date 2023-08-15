@@ -113,8 +113,8 @@ async def create_member_endpoint(member_request: MemberCreateRequest, db: Sessio
 
 @router.delete("/members/{member_id}", summary="Delete member")
 async def delete_member_endpoint(member_id: int, db: Session = Depends(get_db)):
-    member_deleted = delete_member(db, member_id)
     shares_deleted = delete_shares_by_member(db, member_id)
+    member_deleted = delete_member(db, member_id)
 
     if member_deleted and shares_deleted:
         return {"detail": "member and shares deleted successfully"}

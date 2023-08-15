@@ -76,7 +76,7 @@ async def delete_lead_endpoint(lead_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/leads/{lead_id}", summary="Approve leads")
-async def test_lead_endpoint(
+async def approve_lead_endpoint(
     lead_id: int,
     db: Session = Depends(get_db),
     approved: bool = False,

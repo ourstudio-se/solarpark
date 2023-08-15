@@ -40,7 +40,7 @@ class Shares(BaseModel):
 class ShareUpdateRequest(BaseModel):
     comment: Optional[str]
     date: Optional[int]
-    member_id: int
+    member_id: Optional[int]
     initial_value: Optional[int]
     current_value: Optional[int]
 
