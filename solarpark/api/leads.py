@@ -1,4 +1,6 @@
-# pylint: disable=W0511
+# pylint: disable=W0511, W0622
+
+import json
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
@@ -25,8 +27,33 @@ async def get_lead_endpoint(lead_id: int, db: Session = Depends(get_db)) -> Lead
 
 
 @router.get("/leads", summary="Get all leads")
-async def get_leads_endpoint(db: Session = Depends(get_db)) -> Leads:
-    return get_all_leads(db)
+async def get_leads_endpoint(
+    range: str | None = None,
+    sort: str | None = None,
+    filter: str | None = None,
+    db: Session = Depends(get_db),
+) -> Leads:
+    try:
+        # Här förstår jag inte
+        filter_obj = {}
+        sort_obj = []
+        range_obj = []
+
+        if filter:
+            filter_obj = json.loads(filter)
+        if sort:
+            sort_obj = json.loads(sort)
+        if range:
+            range_obj = json.loads(range)
+
+        if filter_obj and "id" in filter_obj:
+            if isinstance(filter_obj["id"], list):
+                return get_lead(db, filter_obj["id"][0])
+            return get_lead(db, filter_obj["id"])
+
+        return get_all_leads(db, sort=sort_obj, range=range_obj)
+    except json.JSONDecodeError as ex:
+        raise HTTPException(status_code=400, detail="error decoding filter, sort or range parameters") from ex
 
 
 @router.put("/leads/{lead_id}", summary="Update lead")

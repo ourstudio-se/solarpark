@@ -1,18 +1,15 @@
-# pylint: disable=W0511, R0914
+# pylint: disable=W0511, R0914,  W0622
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List
 
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from solarpark.models.economics import MemberEconomicsCreateRequest, MemberEconomicsUpdateRequest
+from solarpark.models.economics import EconomicsCreateRequest, EconomicsUpdateRequest
 from solarpark.models.leads import LeadCreateRequest, LeadUpdateRequest  # , LeadApproveRequest
 from solarpark.models.members import MemberCreateRequest
 from solarpark.models.shares import ShareCreateRequest
-from solarpark.persistence.economics import (
-    create_member_economics,
-    get_member_economics_by_member,
-    update_member_economics,
-)
+from solarpark.persistence.economics import create_economics, get_economics_by_member, update_economics
 from solarpark.persistence.members import create_member
 from solarpark.persistence.models.leads import Lead
 from solarpark.persistence.shares import create_share
@@ -25,9 +22,26 @@ def get_lead(db: Session, lead_id: int):
     return {"data": result, "total": len(result)}
 
 
-def get_all_leads(db: Session) -> Dict:
+def get_all_leads(db: Session, sort: List, range: List) -> Dict:
     total_count = db.query(Lead).count()
-    # FIXA PAGINERING OCH SORT, frågar Joar om hur det funkar.
+
+    # Pagination and sort order
+    if len(range) == 2 and len(sort) == 2:
+        return {
+            "data": db.query(Lead)
+            .order_by(text(f"{sort[0]} {sort[1].lower()}"))
+            .offset(range[0])
+            .limit(range[1])
+            .all(),
+            "total": total_count,
+        }
+
+    # Pagination only
+    if len(range) == 2:
+        return {
+            "data": db.query(Lead).order_by(Lead.id).offset(range[0]).limit(range[1]).all(),
+            "total": total_count,
+        }
 
     return {
         "data": db.query(Lead).order_by(Lead.id).offset(0).limit(10).all(),
@@ -87,12 +101,12 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
             for _ in range(lead.quantity_shares):
                 create_share(db=db, share_request=share_request)
 
-            member = get_member_economics_by_member(db, existing_member_id)["data"][0]
+            member = get_economics_by_member(db, existing_member_id)["data"][0]
             nr_of_shares = member.nr_of_shares + lead.quantity_shares
             total_investment = member.total_investment + lead.quantity_shares * settings.SHARE_PRICE
             current_value = member.current_value + lead.quantity_shares * settings.SHARE_PRICE
 
-            member_update_request = MemberEconomicsUpdateRequest(
+            member_update_request = EconomicsUpdateRequest(
                 nr_of_shares=nr_of_shares,
                 total_investment=total_investment,
                 current_value=current_value,
@@ -102,7 +116,7 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
                 disbursed=member.disbursed,
             )
 
-            update_member_economics(db, member.id, member_update_request)
+            update_economics(db, member.id, member_update_request)
 
             delete_lead(db, lead_id)
             return True
@@ -129,7 +143,7 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
         for _ in range(lead.quantity_shares):
             create_share(db=db, share_request=share_request)
 
-        member_create_request = MemberEconomicsCreateRequest(
+        member_create_request = EconomicsCreateRequest(
             member_id=new_member_id,
             nr_of_shares=lead.quantity_shares,
             total_investment=lead.quantity_shares * settings.SHARE_PRICE,
@@ -140,7 +154,7 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
             disbursed=0,
         )
 
-        create_member_economics(db, member_create_request)
+        create_economics(db, member_create_request)
 
         delete_lead(db, lead_id)
         return True
