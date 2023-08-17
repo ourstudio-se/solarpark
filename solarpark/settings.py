@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     ISSUER: str = "https://solarpark.eu.auth0.com/"
     ALGORITHMS: str = "RS256"
     SENDGRID_API_KEY: str
+    SHARE_PRICE: int = 3000
 
 
 settings = Settings()

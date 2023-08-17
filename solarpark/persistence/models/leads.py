@@ -14,7 +14,7 @@ class Lead(Base):
     company_name = Column(String, nullable=True)
     org_number = Column(String, nullable=True)
     street_address = Column(String, nullable=True)
-    zip_code = Column(String, nullable=True)
+    zip_code = Column(String, nullable=True)  # integer istället?
     locality = Column(String, nullable=True)
     email = Column(String, nullable=False)
     telephone = Column(String, nullable=True)

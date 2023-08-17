@@ -22,3 +22,6 @@ class Member(Base):
     swish = Column(String, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
+
+
+# Ska man ha relations för economics här? (one to one?)

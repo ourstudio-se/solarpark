@@ -33,7 +33,7 @@ def commit_email_hook(db: Session, request: Dict):
         if len(plain_dict["Personnummer"]) > 9
         else int(plain_dict["Personnummer"])
     )
-
+    # Behöver hantera mellannamn
     lead_request = LeadCreateRequest(
         firstname=first_last_name[0],
         lastname=first_last_name[1],
