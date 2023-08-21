@@ -9,7 +9,7 @@ class Dividend(BaseModel):
     payment_year: Optional[int]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class Dividends(BaseModel):
@@ -17,7 +17,7 @@ class Dividends(BaseModel):
     total: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class DividendCreateRequest(BaseModel):

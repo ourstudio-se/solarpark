@@ -12,7 +12,7 @@ class Share(BaseModel):
     current_value: Optional[int]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ShareResponse(BaseModel):
@@ -34,7 +34,7 @@ class Shares(BaseModel):
     total: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ShareUpdateRequest(BaseModel):

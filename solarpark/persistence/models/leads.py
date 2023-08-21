@@ -11,7 +11,7 @@ class Lead(Base):
     firstname = Column(String, nullable=True)
     lastname = Column(String, nullable=True)
     birth_date = Column(Integer, nullable=True)
-    company_name = Column(String, nullable=True)
+    org_name = Column(String, nullable=True)
     org_number = Column(String, nullable=True)
     street_address = Column(String, nullable=True)
     zip_code = Column(String, nullable=True)  # integer istället?

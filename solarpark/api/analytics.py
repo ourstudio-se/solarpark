@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from solarpark.persistence.database import get_db
 from solarpark.persistence.members import count_all_members
 from solarpark.persistence.shares import count_all_shares
+from solarpark.settings import settings
 
 router = APIRouter()
 
@@ -35,7 +36,7 @@ async def get_analytics_endpoint(db: Session = Depends(get_db)):
         },
         "shares": {
             "total_count": all_shares,
-            "total_value": all_shares * 3000,
+            "total_value": all_shares * settings.SHARE_PRICE,
             "average_share_count_per_member": all_shares / all_members,
         },
     }

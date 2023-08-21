@@ -15,7 +15,7 @@ class EconomicsMember(BaseModel):
     disbursed: Optional[int]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class Economics(BaseModel):
@@ -23,7 +23,7 @@ class Economics(BaseModel):
     total: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class EconomicsCreateRequest(BaseModel):

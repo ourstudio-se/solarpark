@@ -11,7 +11,7 @@ class Payment(BaseModel):
     paid_out: Optional[bool]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class Payments(BaseModel):
@@ -19,7 +19,7 @@ class Payments(BaseModel):
     total: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class PaymentCreateRequest(BaseModel):

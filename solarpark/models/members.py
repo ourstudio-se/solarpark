@@ -12,7 +12,7 @@ class Member(BaseModel):
     email: Optional[str]
     firstname: Optional[str]
     lastname: Optional[str]
-    company_name: Optional[str]
+    org_name: Optional[str]
     org_number: Optional[str]
     street_address: Optional[str]
     swish: Optional[str]
@@ -21,14 +21,14 @@ class Member(BaseModel):
     zip_code: Optional[int]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class MemberWithShares(Member):
     shares: Optional[List[Share]]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class MemberCreateRequest(BaseModel):
@@ -66,4 +66,4 @@ class Members(BaseModel):
     total: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True

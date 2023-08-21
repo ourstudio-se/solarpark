@@ -8,7 +8,7 @@ class Lead(BaseModel):
     firstname: Optional[str]
     lastname: Optional[str]
     birth_date: Optional[int]
-    company_name: Optional[str]
+    org_name: Optional[str]
     org_number: Optional[str]
     street_address: Optional[str]
     zip_code: Optional[str]
@@ -20,7 +20,7 @@ class Lead(BaseModel):
     generate_certificate: Optional[bool] = False
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class Leads(BaseModel):
@@ -28,14 +28,14 @@ class Leads(BaseModel):
     total: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class LeadCreateRequest(BaseModel):
     firstname: Optional[str]
     lastname: Optional[str]
     birth_date: Optional[int]
-    company_name: Optional[str]
+    org_name: Optional[str]
     org_number: Optional[str]
     street_address: Optional[str]
     zip_code: Optional[str]
@@ -51,7 +51,7 @@ class LeadUpdateRequest(BaseModel):
     firstname: Optional[str]
     lastname: Optional[str]
     birth_date: Optional[int]
-    company_name: Optional[str]
+    org_name: Optional[str]
     org_number: Optional[int]
     street_address: Optional[str]
     zip_code: Optional[int]
