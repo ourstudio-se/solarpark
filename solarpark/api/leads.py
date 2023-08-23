@@ -34,7 +34,6 @@ async def get_leads_endpoint(
     db: Session = Depends(get_db),
 ) -> Leads:
     try:
-        # Här förstår jag inte
         filter_obj = {}
         sort_obj = []
         range_obj = []

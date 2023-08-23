@@ -1,63 +1,62 @@
+from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class Lead(BaseModel):
     id: int
-    firstname: Optional[str]
-    lastname: Optional[str]
-    birth_date: Optional[int]
-    org_name: Optional[str]
-    org_number: Optional[str]
-    street_address: Optional[str]
-    zip_code: Optional[str]
-    locality: Optional[str]
-    email: Optional[str]
-    telephone: Optional[str]
-    existing_id: int
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
+    birth_date: Optional[datetime] = None
+    org_name: Optional[str] = None
+    org_number: Optional[str] = None
+    street_address: Optional[str] = None
+    zip_code: Optional[str] = None
+    locality: Optional[str] = None
+    email: str
+    telephone: Optional[str] = None
+    existing_id: Optional[int] = None
     quantity_shares: int
     generate_certificate: Optional[bool] = False
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Leads(BaseModel):
     data: List[Lead]
     total: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LeadCreateRequest(BaseModel):
-    firstname: Optional[str]
-    lastname: Optional[str]
-    birth_date: Optional[int]
-    org_name: Optional[str]
-    org_number: Optional[str]
-    street_address: Optional[str]
-    zip_code: Optional[str]
-    locality: Optional[str]
-    email: Optional[str]
-    telephone: Optional[str]
-    existing_id: int
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
+    birth_date: Optional[datetime] = None
+    org_name: Optional[str] = None
+    org_number: Optional[str] = None
+    street_address: Optional[str] = None
+    zip_code: Optional[str] = None
+    locality: Optional[str] = None
+    email: str
+    telephone: Optional[str] = None
+    existing_id: Optional[int] = None
     quantity_shares: int
     generate_certificate: bool = False
 
 
 class LeadUpdateRequest(BaseModel):
-    firstname: Optional[str]
-    lastname: Optional[str]
-    birth_date: Optional[int]
-    org_name: Optional[str]
-    org_number: Optional[int]
-    street_address: Optional[str]
-    zip_code: Optional[int]
-    locality: Optional[str]
-    email: Optional[str]
-    telephone: Optional[int]
-    existing_id: Optional[int]
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
+    birth_date: Optional[datetime] = None
+    org_name: Optional[str] = None
+    org_number: Optional[int] = None
+    street_address: Optional[str] = None
+    zip_code: Optional[int] = None
+    locality: Optional[str] = None
+    email: str
+    telephone: Optional[int] = None
+    existing_id: Optional[int] = None
     quantity_shares: int
-    generate_certificate: Optional[bool]
+    generate_certificate: Optional[bool] = None

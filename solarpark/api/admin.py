@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime
 from io import StringIO
 
 from fastapi import APIRouter, Depends, File, UploadFile
@@ -36,7 +37,7 @@ async def import_members(member_file: UploadFile = File(...), db: Session = Depe
                         # Organization member
                         new_member = MemberCreateRequest(
                             id=row["Medlemnr"],
-                            year=row["År"].strip(),
+                            created_at=datetime.strptime(row["År"].strip(), "%y%m%d"),
                             org_name=row["Efternamn/Företagsnamn"].strip(),
                             org_number=row["Födelsedatum"].strip(),
                             street_address=row["Gatuadress"].strip(),
@@ -50,7 +51,7 @@ async def import_members(member_file: UploadFile = File(...), db: Session = Depe
                         # Private person member
                         new_member = MemberCreateRequest(
                             id=row["Medlemnr"],
-                            year=row["År"].strip(),
+                            created_at=datetime.strptime(row["År"].strip(), "%y%m%d"),
                             firstname=row["Förnamn"].strip(),
                             lastname=row["Efternamn/Företagsnamn"].strip()
                             if row["Efternamn/Företagsnamn"]
@@ -98,7 +99,7 @@ async def get_analytics_endpoint(share_file: UploadFile = File(...), db: Session
                     new_share = ShareCreateRequest(
                         id=row["Andel nr"],
                         member_id=row["Medlem"],
-                        date=row["Datum"],
+                        created_at=datetime.strptime(row["Datum"].strip(), "%y%m%d"),
                         comment=row["Amn."],
                         initial_value=3000,
                         current_value=row["Andelsvärde"] if row["Andelsvärde"] else 3000,

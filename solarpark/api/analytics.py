@@ -37,6 +37,6 @@ async def get_analytics_endpoint(db: Session = Depends(get_db)):
         "shares": {
             "total_count": all_shares,
             "total_value": all_shares * settings.SHARE_PRICE,
-            "average_share_count_per_member": all_shares / all_members,
+            "average_share_count_per_member": round(all_shares / all_members),
         },
     }

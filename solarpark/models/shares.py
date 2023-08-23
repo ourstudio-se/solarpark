@@ -1,18 +1,18 @@
+from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class Share(BaseModel):
     id: int
-    comment: Optional[str]
-    date: Optional[int]
+    comment: Optional[str] = None
+    created_at: datetime
     member_id: int
-    initial_value: int
-    current_value: Optional[int]
+    initial_value: float
+    current_value: Optional[float] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ShareResponse(BaseModel):
@@ -22,31 +22,30 @@ class ShareResponse(BaseModel):
 
 class ShareCreateRequest_csv(BaseModel):
     id: int
-    comment: Optional[str]
-    date: int
+    comment: Optional[str] = None
+    created_at: datetime
     member_id: int
-    initial_value: int
-    current_value: int
+    initial_value: float
+    current_value: float
 
 
 class Shares(BaseModel):
     data: List[Share]
     total: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ShareUpdateRequest(BaseModel):
-    comment: Optional[str]
-    date: Optional[int]
-    member_id: Optional[int]
-    initial_value: Optional[int]
-    current_value: Optional[int]
+    comment: Optional[str] = None
+    created_at: datetime
+    member_id: int
+    initial_value: float
+    current_value: float
 
 
 class ShareCreateRequest(BaseModel):
-    comment: Optional[str]
-    date: Optional[int]
+    comment: Optional[str] = None
+    created_at: datetime
     member_id: int
-    initial_value: int
+    initial_value: float

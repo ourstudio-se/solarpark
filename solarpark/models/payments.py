@@ -1,35 +1,33 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class Payment(BaseModel):
     id: int
     member_id: int
-    year: Optional[int]
-    amount: Optional[int]
-    paid_out: Optional[bool]
+    year: int
+    amount: float
+    paid_out: bool
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Payments(BaseModel):
     data: List[Payment]
     total: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PaymentCreateRequest(BaseModel):
     member_id: int
     year: int
-    amount: int
+    amount: float
     paid_out: Optional[bool] = False
 
 
 class PaymentUpdateRequest(BaseModel):
-    year: Optional[int]
-    amount: Optional[int]
-    paid_out: Optional[bool]
+    year: int
+    amount: float
+    paid_out: bool
