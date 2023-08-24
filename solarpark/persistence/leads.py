@@ -57,21 +57,37 @@ def delete_lead(db: Session, lead_id):
 
 
 def create_lead(db: Session, lead_request: LeadCreateRequest):
-    lead = Lead(
-        firstname=lead_request.firstname,
-        lastname=lead_request.lastname,
-        birth_date=lead_request.birth_date,
-        org_name=lead_request.org_name,
-        org_number=lead_request.org_number,
-        street_address=lead_request.street_address,
-        zip_code=lead_request.zip_code,
-        locality=lead_request.locality,
-        email=lead_request.email,
-        telephone=lead_request.telephone,
-        existing_id=lead_request.existing_id,
-        quantity_shares=lead_request.quantity_shares,
-        generate_certificate=lead_request.generate_certificate,
-    )
+    if lead_request.existing_id:
+        lead = Lead(
+            firstname=lead_request.firstname,
+            lastname=lead_request.lastname,
+            birth_date=lead_request.birth_date,
+            org_name=lead_request.org_name,
+            org_number=lead_request.org_number,
+            street_address=lead_request.street_address,
+            zip_code=lead_request.zip_code,
+            locality=lead_request.locality,
+            email=lead_request.email,
+            telephone=lead_request.telephone,
+            existing_id=lead_request.existing_id,
+            quantity_shares=lead_request.quantity_shares,
+            generate_certificate=lead_request.generate_certificate,
+        )
+    else:
+        lead = Lead(
+            firstname=lead_request.firstname,
+            lastname=lead_request.lastname,
+            birth_date=lead_request.birth_date,
+            org_name=lead_request.org_name,
+            org_number=lead_request.org_number,
+            street_address=lead_request.street_address,
+            zip_code=lead_request.zip_code,
+            locality=lead_request.locality,
+            email=lead_request.email,
+            telephone=lead_request.telephone,
+            quantity_shares=lead_request.quantity_shares,
+            generate_certificate=lead_request.generate_certificate,
+        )
 
     db.add(lead)
     db.commit()
@@ -99,7 +115,7 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
     if existing_member_id:
         share_request = ShareCreateRequest(
             comment=comment,
-            date=int(datetime.now().strftime("%Y%m%d")[2:]),
+            purchased_at=datetime.now(),
             member_id=existing_member_id,
             initial_value=settings.SHARE_PRICE,
         )
@@ -131,17 +147,18 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
         email=lead.email,
         firstname=lead.firstname,
         lastname=lead.lastname,
+        org_name=lead.org_name,
         org_number=lead.org_number,
         street_address=lead.street_address,
         telephone=lead.telephone,
-        year=datetime.now().year,  # datetime istället
+        year=datetime.now(),
         zip_code=lead.zip_code,
     )
     new_member = create_member(db, member_request)
     new_member_id = new_member.id
     share_request = ShareCreateRequest(
         comment=comment,
-        date=int(datetime.now().strftime("%Y%m%d")[2:]),
+        purchased_at=datetime.now(),
         member_id=new_member_id,
         initial_value=settings.SHARE_PRICE,
     )

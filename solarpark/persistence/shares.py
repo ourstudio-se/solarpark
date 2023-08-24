@@ -5,7 +5,9 @@ from typing import Dict, List
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from solarpark.models.economics import EconomicsUpdateRequest
 from solarpark.models.shares import ShareCreateRequest, ShareCreateRequestImport, ShareUpdateRequest
+from solarpark.persistence.economics import get_economics_by_member, update_economics
 from solarpark.persistence.models.shares import Share
 
 
@@ -92,6 +94,41 @@ def create_share(db: Session, share_request: ShareCreateRequest):
 
 
 def update_share(db: Session, share_id: int, share_update: ShareUpdateRequest):
+    share_before_update = get_share(db, share_id)
+
+    if share_before_update["data"][0].member_id == share_update.member_id:
+        db.query(Share).filter(Share.id == share_id).update(share_update.dict())
+        db.commit()
+        return db.query(Share).filter(Share.id == share_id).first()
+
+    members_id = [share_before_update["data"][0].member_id, share_update.member_id]
     db.query(Share).filter(Share.id == share_id).update(share_update.dict())
     db.commit()
+
+    for member_id in members_id:
+        shares = get_shares_by_member(db, member_id)
+        nr_of_shares = shares["total"]
+        total_investment = sum(share.initial_value for share in shares["data"])
+        current_value = sum(share.current_value for share in shares["data"])
+
+        member = get_economics_by_member(db, member_id)["data"][0]
+        member_economics_request = EconomicsUpdateRequest(
+            nr_of_shares=nr_of_shares,
+            total_investment=total_investment,
+            current_value=current_value,
+            reinvested=member.reinvested,
+            account_balance=member.account_balance,
+            pay_out=member.pay_out,
+            disbursed=member.disbursed,
+        )
+        update_economics(db, member.id, member_economics_request)
+
     return db.query(Share).filter(Share.id == share_id).first()
+
+
+def delete_share(db: Session, share_id: int) -> bool:
+    deleted = db.query(Share).filter(Share.id == share_id).delete()
+    if deleted == 1:
+        db.commit()
+        return True
+    return False

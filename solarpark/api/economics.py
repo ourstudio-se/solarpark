@@ -15,6 +15,7 @@ from solarpark.persistence.economics import (
     delete_economics,
     get_all_economics,
     get_economics,
+    get_economics_by_member,
     update_economics,
 )
 from solarpark.persistence.shares import create_share, get_shares_by_member
@@ -86,7 +87,7 @@ async def get_all_economics_endpoint(
     db: Session = Depends(get_db),
 ) -> Economics:
     try:
-        # Här förstår jag inte
+
         filter_obj = {}
         sort_obj = []
         range_obj = []
@@ -102,13 +103,15 @@ async def get_all_economics_endpoint(
             if isinstance(filter_obj["id"], list):
                 return get_economics(db, filter_obj["id"][0])
             return get_economics(db, filter_obj["id"])
+        if filter_obj and "member_id" in filter_obj:
+            return get_economics_by_member(db, filter_obj["member_id"])
 
         return get_all_economics(db, sort=sort_obj, range=range_obj)
     except json.JSONDecodeError as ex:
         raise HTTPException(status_code=400, detail="error decoding filter, sort or range parameters") from ex
 
 
-@router.delete("/economics/members/{economics_id}", summary="Delete member")
+@router.delete("/economics/{economics_id}", summary="Delete economics")
 async def delete_member_endpoint(economics_id: int, db: Session = Depends(get_db)):
     economics_deleted = delete_economics(db, economics_id)
 
@@ -127,7 +130,7 @@ async def reinvest_dividend_endpoint(db: Session = Depends(get_db)):
             for _ in range(nr_reinvest_shares):
                 # Lagt till temporär kommentar kanske vill ha ett separat fält sen som i excel?
                 share_create_request = ShareCreateRequest(
-                    comment="From internal account",
+                    comment="Köpt från konto",
                     date=int(datetime.now().strftime("%Y%m%d")[2:]),
                     member_id=member.member_id,
                     initial_value=settings.SHARE_PRICE,

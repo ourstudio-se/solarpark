@@ -19,6 +19,7 @@ class Lead(BaseModel):
     existing_id: Optional[int] = None
     quantity_shares: int
     generate_certificate: Optional[bool] = False
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -51,7 +52,7 @@ class LeadUpdateRequest(BaseModel):
     lastname: Optional[str] = None
     birth_date: Optional[datetime] = None
     org_name: Optional[str] = None
-    org_number: Optional[int] = None
+    org_number: Optional[str] = None
     street_address: Optional[str] = None
     zip_code: Optional[int] = None
     locality: Optional[str] = None

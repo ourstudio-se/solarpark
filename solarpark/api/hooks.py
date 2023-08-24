@@ -20,6 +20,7 @@ async def email_hook(request: Dict, db: Session = Depends(get_db)) -> Lead:
     try:
         return commit_email_hook(db, request)
     except IntegrityError as ex:
+        print(ex)
         get_logger().error(f"error commiting email hook: {ex}")
 
         if "UniqueViolation" in str(ex):

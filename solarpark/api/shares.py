@@ -9,7 +9,14 @@ from sqlalchemy.orm import Session
 from solarpark.api import parse_integrity_error_msg
 from solarpark.models.shares import Share, ShareCreateRequest, Shares, ShareUpdateRequest
 from solarpark.persistence.database import get_db
-from solarpark.persistence.shares import create_share, get_all_shares, get_share, get_shares_by_member, update_share
+from solarpark.persistence.shares import (
+    create_share,
+    delete_share,
+    get_all_shares,
+    get_share,
+    get_shares_by_member,
+    update_share,
+)
 
 router = APIRouter()
 
@@ -92,3 +99,13 @@ async def update_member_endpoint(
                 detail=parse_integrity_error_msg("Key (.*?) not present", str(ex)),
             ) from ex
         raise HTTPException(status_code=400, detail="error updating share") from ex
+
+
+@router.delete("/shares/{share_id}", summary="Delete share")
+async def delete_share_endpoint(share_id: int, db: Session = Depends(get_db)):
+    shares_deleted = delete_share(db, share_id)
+
+    if shares_deleted:
+        return {"detail": "share deleted successfully"}
+
+    return {"detail": "no share deleted"}

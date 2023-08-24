@@ -104,8 +104,8 @@ async def delete_lead_endpoint(lead_id: int, db: Session = Depends(get_db)):
 @router.post("/leads/{lead_id}", summary="Approve leads")
 async def approve_lead_endpoint(
     lead_id: int,
+    approved: bool,
     db: Session = Depends(get_db),
-    approved: bool = False,
     comment: str = "",
 ):
     handled_lead = approve_lead(db, lead_id, approved, comment)
