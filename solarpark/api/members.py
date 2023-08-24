@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from solarpark.api import parse_integrity_error_msg
 from solarpark.models.members import Member, MemberCreateRequest, Members, MemberUpdateRequest, MemberWithShares
 from solarpark.persistence.database import get_db
+from solarpark.persistence.economics import delete_economics_by_member
 from solarpark.persistence.members import (
     create_member,
     delete_member,
@@ -114,10 +115,13 @@ async def create_member_endpoint(member_request: MemberCreateRequest, db: Sessio
 @router.delete("/members/{member_id}", summary="Delete member")
 async def delete_member_endpoint(member_id: int, db: Session = Depends(get_db)):
     shares_deleted = delete_shares_by_member(db, member_id)
+    economics_deleted = delete_economics_by_member(db, member_id)
     member_deleted = delete_member(db, member_id)
 
+    if member_deleted and shares_deleted and economics_deleted:
+        return {"detail": "member, shares and economics deleted successfully"}
     if member_deleted and shares_deleted:
-        return {"detail": "member and shares deleted successfully"}
+        return {"detail": " only member and shares deleted successfully"}
     if shares_deleted:
         return {"detail": "only shares deleted successfully"}
     if member_deleted:

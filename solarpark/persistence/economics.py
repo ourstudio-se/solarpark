@@ -74,3 +74,11 @@ def delete_economics(db: Session, economics_id: int) -> bool:
         db.commit()
         return True
     return False
+
+
+def delete_economics_by_member(db: Session, member_id: int) -> bool:
+    deleted = db.query(Economics).filter(Economics.member_id == member_id).delete()
+    if deleted == 1:
+        db.commit()
+        return True
+    return False

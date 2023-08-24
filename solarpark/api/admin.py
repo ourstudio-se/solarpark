@@ -23,6 +23,13 @@ def parse_birth_date(birth_date: str):
         return datetime.strptime(birth_date, "%Y%m%d")
     if len(birth_date) == 4:
         return datetime.strptime(birth_date, "%Y")
+    if len(birth_date) == 6:
+        return datetime.strptime(birth_date, "%y%m%d")
+    if len(birth_date) == 10:
+        return datetime.strptime(birth_date[:6], "%y%m%d")
+    if len(birth_date) == 12:
+        return datetime.strptime(birth_date[:8], "%Y%m%d")
+
     return None
 
 

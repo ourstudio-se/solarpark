@@ -5,6 +5,7 @@ from solarpark.api import (
     analytics,
     dividends,
     economics,
+    error_log,
     generate,
     hooks,
     leads,
@@ -18,6 +19,11 @@ from solarpark.logging import get_logger
 
 
 def add_routes(app) -> None:
+    app.include_router(
+        error_log.router,
+        tags=["error log"],
+        dependencies=[Depends(get_logger), Depends(api_security)],
+    )
     app.include_router(
         send_email.router,
         tags=["send_email"],

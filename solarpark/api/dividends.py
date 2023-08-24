@@ -138,7 +138,7 @@ async def make_dividend_endpoint(payment_year: int, db: Session = Depends(get_db
 
                 share_request = ShareUpdateRequest(
                     comment=share.comment,
-                    date=share.date,
+                    date=share.purchased_at,
                     member_id=share.member_id,
                     initial_value=share.initial_value,
                     current_value=current_value,

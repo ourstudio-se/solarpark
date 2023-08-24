@@ -4,6 +4,7 @@ from typing import Dict
 
 from sqlalchemy.orm import Session
 
+from solarpark.api.admin import parse_birth_date
 from solarpark.models.leads import LeadCreateRequest
 from solarpark.persistence.leads import create_lead
 
@@ -26,22 +27,16 @@ def commit_email_hook(db: Session, request: Dict):
     first_last_name = re.split(" ", plain_dict["Namn"])
     quantity_shares = re.split(" ", plain_dict["Antal beställda andelar"])[0]
     generate_certificate = "Ja" == plain_dict["Andelsbevis via epost"]
-    existing_id = int(plain_dict["Medlemsnummer"]) if (plain_dict["Medlemsnummer"] != "") else 0
-
-    birth_date = (
-        int(plain_dict["Personnummer"][0:-4])  # Not security number
-        if len(plain_dict["Personnummer"]) > 9
-        else int(plain_dict["Personnummer"])
-    )
+    existing_id = int(plain_dict["Medlemsnummer"]) if (plain_dict["Medlemsnummer"] != "") else None
 
     # Handle multiple names
     lastname_stripped = first_last_name.pop()
     firstnames_stripped = first_last_name
 
     lead_request = LeadCreateRequest(
-        firstname=firstnames_stripped,
+        firstname=" ".join(firstnames_stripped),
         lastname=lastname_stripped,
-        birth_date=birth_date,
+        birth_date=parse_birth_date(plain_dict["Personnummer"]),
         org_name=plain_dict["Namn"],
         org_number=plain_dict["Personnummer"],
         street_address=plain_dict["Adress"],
