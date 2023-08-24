@@ -13,6 +13,7 @@ class Share(Base):
     comment = Column(String, nullable=True)
     initial_value = Column(Float, nullable=False)
     current_value = Column(Float, nullable=False)
+    purchased_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, server_default=utcnow())
     updated_at = Column(DateTime, onupdate=utcnow())
 

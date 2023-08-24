@@ -69,6 +69,8 @@ def create_member(db: Session, member_request: MemberCreateRequest):
     member = Member(
         firstname=member_request.firstname,
         lastname=member_request.lastname,
+        org_name=member_request.org_name,
+        org_number=member_request.org_number,
         year=member_request.year,
         birth_date=member_request.birth_date,
         street_address=member_request.street_address,

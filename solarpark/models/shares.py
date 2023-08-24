@@ -7,7 +7,9 @@ from pydantic import BaseModel, ConfigDict
 class Share(BaseModel):
     id: int
     comment: Optional[str] = None
+    purchased_at: datetime
     created_at: datetime
+    updated_at: Optional[datetime] = None
     member_id: int
     initial_value: float
     current_value: Optional[float] = None
@@ -20,10 +22,10 @@ class ShareResponse(BaseModel):
     total: int
 
 
-class ShareCreateRequest_csv(BaseModel):
+class ShareCreateRequestImport(BaseModel):
     id: int
     comment: Optional[str] = None
-    created_at: datetime
+    purchased_at: datetime
     member_id: int
     initial_value: float
     current_value: float
@@ -38,7 +40,7 @@ class Shares(BaseModel):
 
 class ShareUpdateRequest(BaseModel):
     comment: Optional[str] = None
-    created_at: datetime
+    purchased_at: datetime
     member_id: int
     initial_value: float
     current_value: float
@@ -46,6 +48,6 @@ class ShareUpdateRequest(BaseModel):
 
 class ShareCreateRequest(BaseModel):
     comment: Optional[str] = None
-    created_at: datetime
+    purchased_at: datetime
     member_id: int
     initial_value: float

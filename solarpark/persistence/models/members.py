@@ -18,5 +18,6 @@ class Member(Base):
     email = Column(String, nullable=False)
     bank = Column(String, nullable=True)
     swish = Column(String, nullable=True)
+    year = Column(DateTime, nullable=True)
     created_at = Column(DateTime, server_default=utcnow())
     updated_at = Column(DateTime, onupdate=utcnow())

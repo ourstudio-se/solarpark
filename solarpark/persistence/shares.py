@@ -5,7 +5,7 @@ from typing import Dict, List
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from solarpark.models.shares import ShareCreateRequest, ShareCreateRequest_csv, ShareUpdateRequest
+from solarpark.models.shares import ShareCreateRequest, ShareCreateRequestImport, ShareUpdateRequest
 from solarpark.persistence.models.shares import Share
 
 
@@ -62,13 +62,13 @@ def delete_shares_by_member(db: Session, member_id: int):
     return False
 
 
-def create_share_csv(db: Session, share_request: ShareCreateRequest_csv):
+def create_share_import(db: Session, share_request: ShareCreateRequestImport):
     share = Share(
         id=share_request.id,
         member_id=share_request.member_id,
         initial_value=share_request.initial_value,
         current_value=share_request.current_value,
-        date=share_request.date,
+        purchased_at=share_request.purchased_at,
         comment=share_request.comment,
     )
     db.add(share)
@@ -80,10 +80,10 @@ def create_share_csv(db: Session, share_request: ShareCreateRequest_csv):
 def create_share(db: Session, share_request: ShareCreateRequest):
     share = Share(
         comment=share_request.comment,
-        date=share_request.date,
         member_id=share_request.member_id,
         initial_value=share_request.initial_value,
         current_value=share_request.initial_value,
+        purchased_at=share_request.purchased_at,
     )
     db.add(share)
     db.commit()
