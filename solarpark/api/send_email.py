@@ -1,11 +1,12 @@
 import io
 import os
+from datetime import datetime
 
-import pdfkit
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from jinja2 import Environment, FileSystemLoader
 from sqlalchemy.orm import Session
 
+from solarpark.api.generate import generate_certificate_pdf
 from solarpark.models.email import Attachment, Email
 from solarpark.persistence.database import get_db
 from solarpark.persistence.members import get_member
@@ -38,52 +39,28 @@ def send_certificate_with_sendgrid(
     shares = shares["data"]
 
     context = {
-        "title": "Test Solarpark",
-        "id": member_id,
-        "name": f"{member.firstname} {member.lastname}",
-        "shares": [{"id": share.id} for share in shares],
+        "title": "Andelsbevis Solar Park",
+        "id": member.id,
+        "name": f"{member.firstname} {member.lastname}" if member.lastname is not None else member.org_name,
+        "shares": [{"id": share.id, "purchased_at": share.purchased_at.strftime("%Y-%m-%d")} for share in shares],
         "image_path": get_image_path(),
+        "today": datetime.today().strftime("%Y-%m-%d"),
     }
 
     env = Environment(loader=FileSystemLoader("solarpark/templates/"))
     template_email = env.get_template("email.html")
-    template_pdf = env.get_template("pdf.html")
 
-    html_pdf = template_pdf.render(context)
     html_mail = template_email.render(context)
-
-    # Check if wkhtmltopdf is on OS path, else fallback to "/bin/wkhtmltopdf" for production setup
-    pdf = None
-    config = None
-    try:
-        config = pdfkit.configuration()
-        pdf = io.BytesIO(
-            pdfkit.from_string(
-                input=html_pdf,
-                options={
-                    "enable-local-file-access": "",
-                },
-                configuration=config,
-            )
-        )
-    except OSError:
-        config = pdfkit.configuration(wkhtmltopdf="/bin/wkhtmltopdf")
-        pdf = io.BytesIO(
-            pdfkit.from_string(
-                input=html_pdf,
-                options={
-                    "enable-local-file-access": "",
-                },
-                configuration=config,
-            )
-        )
+    pdf = generate_certificate_pdf(member, shares)
 
     mail = Email(
-        subject="Solarpark ägande (test)",
-        to_email="simon@ourstudio.se",  # Change
+        subject="Andelsbevis Solar Park",
+        to_emails=["joar@ourstudio.se", "simon@ourstudio.se"],  # Change
         from_email="joar@ourstudio.se",  # Change
         html_content=html_mail,
-        attachments=[Attachment(file_content=pdf, file_name="summering.pdf", file_type="application/pdf")],
+        attachments=[
+            Attachment(file_content=io.BytesIO(pdf), file_name="andelsbevis.pdf", file_type="application/pdf")
+        ],
     )
 
     sendgrid.send(mail)
