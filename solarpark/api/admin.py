@@ -2,15 +2,17 @@ import csv
 from datetime import datetime
 from io import StringIO
 
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, UploadFile
 from sqlalchemy.orm import Session
 from structlog import get_logger
 
+from solarpark.models.economics import EconomicsCreateRequest
 from solarpark.models.members import MemberCreateRequest
 from solarpark.models.shares import ShareCreateRequestImport
 from solarpark.persistence.database import get_db
-from solarpark.persistence.members import create_member
-from solarpark.persistence.shares import create_share_import
+from solarpark.persistence.economics import create_economics, get_economics_by_member
+from solarpark.persistence.members import count_all_members, create_member, get_all_members
+from solarpark.persistence.shares import create_share_import, get_shares_by_member
 from solarpark.settings import settings
 
 router = APIRouter()
@@ -22,6 +24,55 @@ def parse_birth_date(birth_date: str):
     if len(birth_date) == 4:
         return datetime.strptime(birth_date, "%Y")
     return None
+
+
+def create_economics_for_all_members(db: Session):
+    """Create economics for existing members with shares"""
+    member_count = count_all_members(db)
+    offset = 0
+    limit = 20
+
+    while offset < member_count:
+        members = get_all_members(db, [], [offset, limit])
+
+        if not members and "data" not in members:
+            get_logger().error("error fetching members, aborting job")
+            break
+
+        for member in members["data"]:
+            # Iterate members and check if they have economics record already created
+            member_economics = get_economics_by_member(db=db, member_id=member.id)
+
+            if member_economics and "data" in member_economics and member_economics["total"] == 0:
+                # Get member shares and skip member if no shares found
+                member_shares = get_shares_by_member(db, member_id=member.id)
+
+                if member_shares and "data" in member_shares and member_shares["total"] > 0:
+                    # Create economics record for member
+                    nr_of_shares = member_shares["total"]
+                    total_investment = sum(share.initial_value for share in member_shares["data"])
+                    current_value = sum(share.current_value for share in member_shares["data"])
+
+                    created = create_economics(
+                        db,
+                        EconomicsCreateRequest(
+                            member_id=member.id,
+                            nr_of_shares=nr_of_shares,
+                            total_investment=total_investment,
+                            current_value=current_value,
+                            account_balance=0,
+                            reinvested=0,
+                            pay_out=False,
+                        ),
+                    )
+
+                    if created:
+                        get_logger().info(f"created economics record successfully for member {member.id}")
+                    else:
+                        get_logger().error(f"error creating economics record for member {member.id}")
+
+        # Increment offset for next batch
+        offset += limit
 
 
 @router.post("/import-members", summary="Import members from csv")
@@ -122,3 +173,15 @@ async def get_analytics_endpoint(share_file: UploadFile = File(...), db: Session
 
     if errors:
         get_logger().error(f"{len(errors)} shares could not be imported, {errors}")
+
+
+@router.post("/create-economics-for-members", summary="Create economics for all members after import", status_code=202)
+async def create_economics_endpoint(
+    background_tasks: BackgroundTasks = BackgroundTasks(), db: Session = Depends(get_db)
+):
+    """
+    Creates economics records for all members as background job.
+    This endpoint is generally called once after initial import.
+    Can be called multiple times without issues.
+    """
+    background_tasks.add_task(create_economics_for_all_members, db)
