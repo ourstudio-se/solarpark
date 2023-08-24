@@ -22,8 +22,8 @@ def generate_certificate_pdf(member, shares):
     context = {
         "title": "Andelsbevis Solar Park",
         "id": member.id,
-        "name": f"{member.firstname} {member.lastname}",
-        "shares": [{"id": share.id, "created_at": share.created_at.strftime("%Y-%m-%d")} for share in shares],
+        "name": f"{member.firstname} {member.lastname}" if member.lastname is not None else member.org_name,
+        "shares": [{"id": share.id, "purchased_at": share.purchased_at.strftime("%Y-%m-%d")} for share in shares],
         "image_path": get_image_path(),
         "today": datetime.today().strftime("%Y-%m-%d"),
     }
@@ -61,7 +61,7 @@ async def generate_certificate_endpoint(member_id: int, db: Session = Depends(ge
         raise HTTPException(status_code=400, detail="member not found")
 
     shares = get_shares_by_member(db, member_id)
-    print(shares)
+
     if not len(shares["data"]) > 0:
         raise HTTPException(status_code=400, detail="no shares found for member")
 

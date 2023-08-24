@@ -16,7 +16,7 @@ class SendGridClient:
     def send(self, mail: Email):
         message = Mail(
             from_email=mail.from_email,
-            to_emails=mail.to_email,
+            to_emails=mail.to_emails,
             subject=mail.subject,
             html_content=mail.html_content,
         )
