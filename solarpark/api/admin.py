@@ -27,7 +27,7 @@ def parse_birth_date(birth_date: str):
 
 
 def create_economics_for_all_members(db: Session):
-
+    """Create economics for existing members with shares"""
     member_count = count_all_members(db)
     offset = 0
     limit = 20
