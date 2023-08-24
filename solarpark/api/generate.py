@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import pdfkit
 from fastapi import APIRouter, Depends, HTTPException, Response
@@ -19,11 +20,12 @@ def get_image_path():
 
 def generate_certificate_pdf(member, shares):
     context = {
-        "title": "Test Solarpark",
+        "title": "Andelsbevis Solar Park",
         "id": member.id,
         "name": f"{member.firstname} {member.lastname}",
-        "shares": [{"id": share.id} for share in shares],
+        "shares": [{"id": share.id, "created_at": share.created_at.strftime("%Y-%m-%d")} for share in shares],
         "image_path": get_image_path(),
+        "today": datetime.today().strftime("%Y-%m-%d"),
     }
 
     env = Environment(loader=FileSystemLoader("solarpark/templates/"))
@@ -52,22 +54,18 @@ def generate_certificate_pdf(member, shares):
     return pdf
 
 
-@router.get("/generate/certificate/{member_id}", summary="Generate participation certificate")
+@router.get("/generate/certificate/{member_id}", summary="Generate certificate of participation")
 async def generate_certificate_endpoint(member_id: int, db: Session = Depends(get_db)):
     member = get_member(db, member_id)
     if len(member["data"]) != 1:
         raise HTTPException(status_code=400, detail="member not found")
 
     shares = get_shares_by_member(db, member_id)
+    print(shares)
     if not len(shares["data"]) > 0:
         raise HTTPException(status_code=400, detail="no shares found for member")
 
     pdf = generate_certificate_pdf(member["data"][0], shares["data"])
 
-    headers = {"Content-Disposition": 'attachment; filename="certifikat.pdf"'}  # DOWNLOAD
-    # pylint: disable = W0105
-    """ headers = {
-        "Content-Disposition": 'inline; filename="certifikat.pdf"'
-    } """  # DISPLAY ONLY
-
+    headers = {"Content-Disposition": 'attachment; filename="andelsbevis.pdf"'}
     return Response(pdf, headers=headers, media_type="application/pdf")

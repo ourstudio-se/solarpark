@@ -1,8 +1,7 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 
-from solarpark.persistence.database import Base
+from solarpark.persistence.database import Base, utcnow
 from solarpark.persistence.members import Member
 
 
@@ -11,12 +10,12 @@ class Share(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement="auto")
     member_id = Column(Integer, ForeignKey("members.id"), nullable=False)
-    date = Column(Integer, nullable=False)  # kanske string iställt och använda datetime.now().strftime("%Y-%m-%d")
     comment = Column(String, nullable=True)
-    initial_value = Column(Integer, nullable=False)
-    current_value = Column(Integer, nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, onupdate=func.now())
+    initial_value = Column(Float, nullable=False)
+    current_value = Column(Float, nullable=False)
+    purchased_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, server_default=utcnow())
+    updated_at = Column(DateTime, onupdate=utcnow())
 
     # Relationships
     members = relationship(Member)

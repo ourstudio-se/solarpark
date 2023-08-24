@@ -18,7 +18,6 @@ from solarpark.settings import settings
 
 def get_lead(db: Session, lead_id: int):
     result = db.query(Lead).filter(Lead.id == lead_id).all()
-
     return {"data": result, "total": len(result)}
 
 
@@ -62,7 +61,7 @@ def create_lead(db: Session, lead_request: LeadCreateRequest):
         firstname=lead_request.firstname,
         lastname=lead_request.lastname,
         birth_date=lead_request.birth_date,
-        company_name=lead_request.company_name,
+        org_name=lead_request.org_name,
         org_number=lead_request.org_number,
         street_address=lead_request.street_address,
         zip_code=lead_request.zip_code,
@@ -89,81 +88,81 @@ def update_lead(db: Session, lead_id: int, lead_update: LeadUpdateRequest):
 def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
     lead = db.query(Lead).filter(Lead.id == lead_id).all()[0]
 
-    if approved:
-        existing_member_id = lead.existing_id
-        if existing_member_id:
-            share_request = ShareCreateRequest(
-                comment=comment,
-                date=int(datetime.now().strftime("%Y%m%d")[2:]),
-                member_id=existing_member_id,
-                initial_value=settings.SHARE_PRICE,
-            )
-            for _ in range(lead.quantity_shares):
-                create_share(db=db, share_request=share_request)
-
-            member = get_economics_by_member(db, existing_member_id)["data"][0]
-            nr_of_shares = member.nr_of_shares + lead.quantity_shares
-            total_investment = member.total_investment + lead.quantity_shares * settings.SHARE_PRICE
-            current_value = member.current_value + lead.quantity_shares * settings.SHARE_PRICE
-
-            member_update_request = EconomicsUpdateRequest(
-                nr_of_shares=nr_of_shares,
-                total_investment=total_investment,
-                current_value=current_value,
-                reinvested=member.reinvested,
-                account_balance=member.account_balance,
-                pay_out=member.pay_out,
-                disbursed=member.disbursed,
-            )
-
-            update_economics(db, member.id, member_update_request)
-
-            delete_lead(db, lead_id)
-            return True
-
-        member_request = MemberCreateRequest(
-            birth_date=lead.birth_date,
-            email=lead.email,
-            firstname=lead.firstname,
-            lastname=lead.lastname,
-            org_number=lead.org_number,
-            street_address=lead.street_address,
-            telephone=lead.telephone,
-            year=datetime.now().year,  # datetime istället
-            zip_code=lead.zip_code,
-        )
-        new_member = create_member(db, member_request)
-        new_member_id = new_member.id
-        share_request = ShareCreateRequest(
-            comment=comment,
-            date=int(datetime.now().strftime("%Y%m%d")[2:]),
-            member_id=new_member_id,
-            initial_value=settings.SHARE_PRICE,
-        )
-        for _ in range(lead.quantity_shares):
-            create_share(db=db, share_request=share_request)
-
-        member_create_request = EconomicsCreateRequest(
-            member_id=new_member_id,
-            nr_of_shares=lead.quantity_shares,
-            total_investment=lead.quantity_shares * settings.SHARE_PRICE,
-            current_value=lead.quantity_shares * settings.SHARE_PRICE,
-            reinvested=0,
-            account_balance=0,
-            pay_out=False,
-            disbursed=0,
-        )
-
-        create_economics(db, member_create_request)
-
-        delete_lead(db, lead_id)
+    if not lead:
         return True
 
     if not approved:
         delete_lead(db, lead_id)
         return True
 
-    return False
+    existing_member_id = lead.existing_id
+    if existing_member_id:
+        share_request = ShareCreateRequest(
+            comment=comment,
+            date=int(datetime.now().strftime("%Y%m%d")[2:]),
+            member_id=existing_member_id,
+            initial_value=settings.SHARE_PRICE,
+        )
+        for _ in range(lead.quantity_shares):
+            create_share(db=db, share_request=share_request)
+
+        member = get_economics_by_member(db, existing_member_id)["data"][0]
+        nr_of_shares = member.nr_of_shares + lead.quantity_shares
+        total_investment = member.total_investment + lead.quantity_shares * settings.SHARE_PRICE
+        current_value = member.current_value + lead.quantity_shares * settings.SHARE_PRICE
+
+        member_update_request = EconomicsUpdateRequest(
+            nr_of_shares=nr_of_shares,
+            total_investment=total_investment,
+            current_value=current_value,
+            reinvested=member.reinvested,
+            account_balance=member.account_balance,
+            pay_out=member.pay_out,
+            disbursed=member.disbursed,
+        )
+
+        update_economics(db, member.id, member_update_request)
+
+        delete_lead(db, lead_id)
+        return True
+
+    member_request = MemberCreateRequest(
+        birth_date=lead.birth_date,
+        email=lead.email,
+        firstname=lead.firstname,
+        lastname=lead.lastname,
+        org_number=lead.org_number,
+        street_address=lead.street_address,
+        telephone=lead.telephone,
+        year=datetime.now().year,  # datetime istället
+        zip_code=lead.zip_code,
+    )
+    new_member = create_member(db, member_request)
+    new_member_id = new_member.id
+    share_request = ShareCreateRequest(
+        comment=comment,
+        date=int(datetime.now().strftime("%Y%m%d")[2:]),
+        member_id=new_member_id,
+        initial_value=settings.SHARE_PRICE,
+    )
+    for _ in range(lead.quantity_shares):
+        create_share(db=db, share_request=share_request)
+
+    member_create_request = EconomicsCreateRequest(
+        member_id=new_member_id,
+        nr_of_shares=lead.quantity_shares,
+        total_investment=lead.quantity_shares * settings.SHARE_PRICE,
+        current_value=lead.quantity_shares * settings.SHARE_PRICE,
+        reinvested=0,
+        account_balance=0,
+        pay_out=False,
+        disbursed=0,
+    )
+
+    create_economics(db, member_create_request)
+
+    delete_lead(db, lead_id)
+    return True
 
     # Todo
     # Ta bort lead från databasen för godkänd/icke godkänd medlem

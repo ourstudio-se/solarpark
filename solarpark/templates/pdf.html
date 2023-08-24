@@ -1,42 +1,98 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8" />
-		<title>Test Solarpark</title>
-	</head>
+  <head>
+    <meta charset="utf-8" />
+    <title>Andelsbevis Solar Park</title>
 
-	<body>
-		<p style="text-align: center">&nbsp;</p>
-		<p style="text-align: center">&nbsp;</p>
-		<p style="text-align: center">
-			<img src="{{image_path}}" style="width: 230px; height: 150px" />
-		</p>
-		<p style="text-align: center">&nbsp;</p>
+    <style>
+      .left {
+        float: left;
+        text-align: left;
+        padding-right: 10px;
+      }
 
-		<h3 style="text-align: center">
-			<span style="font-family: arial, helvetica, sans-serif"> Medlem: {{ name }}</span>
-		</h3>
+      .center {
+        text-align: center;
+      }
 
-		<p style="text-align: center">
-			<font face="arial, helvetica, sans-serif"><b>Medlems id: {{ id }}</b></font>
-		</p>
+      .right {
+        float: right;
+        text-align: right;
+        padding-left: 10px;
+      }
+    </style>
+  </head>
 
-		<h1 style="text-align: center"><span style="font-family: arial, helvetica, sans-serif">ANDELAR</span></h1>
+  <body>
+    <p style="text-align: center">&nbsp;</p>
+    <p style="text-align: center">&nbsp;</p>
+    <p style="text-align: center">
+      <img src="{{image_path}}" style="width: 270px" />
+    </p>
 
-		{% for share in shares %}
-		<p style="text-align: center">
-			<span style="font-family: arial, helvetica, sans-serif; text-align: center">Andels id: {{ share.id }}</span>
-		</p>
-		{% endfor %}
+    <p style="text-align: center">&nbsp;</p>
+    <p style="text-align: center">&nbsp;</p>
+    <p style="text-align: center">&nbsp;</p>
 
-		<p style="text-align: center">&nbsp;</p>
-		<p style="text-align: center">&nbsp;</p>
+    <h1 class="center">
+      <span style="font-family: arial, helvetica, sans-serif">ANDELSBEVIS</span>
+    </h1>
 
-		<h3 style="text-align: center">
-			<font face="arial, helvetica, sans-serif">Solel i Helsingborg</font>
-		</h3>
-		<h4 style="text-align: center">
-			<span style="font-family: arial, helvetica, sans-serif">Ekonomisk förening</span>
-		</h4>
-	</body>
+    <div class="center">
+      <p>
+        <span style="font-family: arial, helvetica, sans-serif; text-align: center">Andelsnummer - Datum</span>
+      </p>
+      {% for share in shares %}
+      <p style="text-align: center">
+        <span style="font-family: arial, helvetica, sans-serif; text-align: center"
+          >{{ share.id }} - {{ share.created_at }}</span
+        >
+      </p>
+      {% endfor %}
+    </div>
+
+    <p style="text-align: center">&nbsp;</p>
+    <p style="text-align: center">&nbsp;</p>
+    <p style="text-align: center">&nbsp;</p>
+    <p style="text-align: center">&nbsp;</p>
+    <p style="text-align: center">&nbsp;</p>
+
+    <h4 class="center">
+      <font face="arial, helvetica, sans-serif">Solel i Helsingborg Ekonomisk förening</font>
+      <p></p>
+      <font face="arial, helvetica, sans-serif">769629–1090</font>
+    </h4>
+
+    <p style="text-align: center">&nbsp;</p>
+    <p style="text-align: center">&nbsp;</p>
+    <p style="text-align: center">&nbsp;</p>
+    <p style="text-align: center">&nbsp;</p>
+    <p style="text-align: center">&nbsp;</p>
+
+    <div>
+      <h3 class="left">
+        <span style="font-family: arial, helvetica, sans-serif">{{ id }}</span>
+        <span style="font-family: arial, helvetica, sans-serif">{{ name }}</span>
+        <p></p>
+        <span style="font-family: arial, helvetica, sans-serif">Medl.nr. Andelsägare</span>
+      </h3>
+
+      <h3 class="right">
+        <span style="font-family: arial, helvetica, sans-serif">Lars-Inge Persson</span>
+        <p></p>
+        <span style="font-family: arial, helvetica, sans-serif">Ordförande</span>
+      </h3>
+    </div>
+
+    <p style="text-align: center">&nbsp;</p>
+    <p style="text-align: center">&nbsp;</p>
+    <p style="text-align: center">&nbsp;</p>
+    <p style="text-align: center">&nbsp;</p>
+
+    <div class="center">
+      <h5>
+        <font face="arial, helvetica, sans-serif">Utfärdat {{today}}</font>
+      </h5>
+    </div>
+  </body>
 </html>

@@ -14,4 +14,4 @@ class Email(BaseModel):
     to_email: str
     subject: str
     html_content: str
-    attachments: Optional[list[Attachment]]
+    attachments: Optional[list[Attachment]] = None

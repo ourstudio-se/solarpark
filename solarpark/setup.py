@@ -31,17 +31,17 @@ def add_routes(app) -> None:
     app.include_router(
         payments.router,
         tags=["payments"],
-        dependencies=[Depends(api_security)],
+        dependencies=[Depends(get_logger), Depends(api_security)],
     )
     app.include_router(
         dividends.router,
         tags=["dividends"],
-        dependencies=[Depends(api_security)],
+        dependencies=[Depends(get_logger), Depends(api_security)],
     )
     app.include_router(
         economics.router,
         tags=["economics"],
-        dependencies=[Depends(api_security)],
+        dependencies=[Depends(get_logger), Depends(api_security)],
     )
     app.include_router(
         members.router,
