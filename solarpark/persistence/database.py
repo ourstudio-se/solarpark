@@ -21,6 +21,14 @@ def get_db():
         db.close()
 
 
+def get_error_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 class utcnow(expression.FunctionElement):
     type = DateTime()
     inherit_cache = True

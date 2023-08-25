@@ -1,16 +1,13 @@
 # pylint: disable=W0511, W0622, R0914, R1721, W0707,R1731
 import json
-from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from solarpark.api import parse_integrity_error_msg
 from solarpark.models.dividends import Dividend, DividendCreateRequest, Dividends, DividendUpdateRequest
-from solarpark.models.economics import EconomicsUpdateRequest
-from solarpark.models.payments import PaymentCreateRequest
-from solarpark.models.shares import ShareUpdateRequest
+from solarpark.persistence import make_dividend
 from solarpark.persistence.database import get_db
 from solarpark.persistence.dividends import (
     create_dividend,
@@ -20,9 +17,7 @@ from solarpark.persistence.dividends import (
     get_dividend_by_year,
     update_dividend,
 )
-from solarpark.persistence.economics import get_all_economics, update_economics
-from solarpark.persistence.payments import create_payment
-from solarpark.persistence.shares import get_shares_by_member, update_share
+from solarpark.persistence.economics import get_all_economics
 
 router = APIRouter()
 
@@ -122,75 +117,25 @@ async def delete_dividend_endpoint(dividend_id: int, db: Session = Depends(get_d
 
 
 @router.put("/dividends/fulfill/{payment_year}", summary="Carry out dividend")
-async def make_dividend_endpoint(payment_year: int, db: Session = Depends(get_db)):
-    try:
-        amount = get_dividend_by_year(db, payment_year)["data"][0].dividend_per_share
-        # Max 10 från databas (limit(10))?
-        # Vad händer om det bryts mitt i? Har bara några blivit uppdaterade?
-        members_economics = get_all_economics(db, [], [])["data"]
+async def make_dividend_endpoint(
+    payment_year: int,
+    db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks = BackgroundTasks(),
+):
+    dividend = get_dividend_by_year(db, payment_year)
+    if dividend and dividend["data"]:
+        if len(dividend["data"]) != 1:
+            raise HTTPException(status_code=400, detail="no dividend found or no unique dividend ")
+        amount = dividend["data"][0].dividend_per_share
+    else:
+        raise HTTPException(status_code=400, detail="no dividend found")
 
-        for member in members_economics:
-            shares = get_shares_by_member(db, member.member_id)["data"]
-            for share in shares:
-                current_value = share.current_value - amount
-                if current_value < 0:
-                    current_value = 0
+    economics = get_all_economics(db, [], [])
+    if economics and economics["total"]:
+        nr_of_economics = economics["total"]
+    else:
+        raise HTTPException(status_code=400, detail="economics not found")
 
-                share_request = ShareUpdateRequest(
-                    comment=share.comment,
-                    date=share.purchased_at,
-                    member_id=share.member_id,
-                    initial_value=share.initial_value,
-                    current_value=current_value,
-                )
-                update_share(db, share.id, share_request)
+    background_tasks.add_task(make_dividend, db, amount, payment_year, nr_of_economics)
 
-            shares = get_shares_by_member(db, member.member_id)
-            nr_of_shares = shares["total"]
-            total_investment = sum(share.initial_value for share in shares["data"])
-            current_value = sum(share.current_value for share in shares["data"])
-            dividend = amount * nr_of_shares
-            account_balance = dividend + member.account_balance
-            disbursed = member.disbursed
-            reinvested = member.reinvested
-
-            if member.pay_out:
-                disbursed = dividend + disbursed + member.account_balance  # member account if user change payout
-                account_balance = 0
-
-                payment_create_request = PaymentCreateRequest(
-                    member_id=member.member_id,
-                    year=datetime.now().year,
-                    amount=(dividend + member.account_balance),
-                    paid_out=False,
-                )
-                create_payment(db, payment_create_request)
-
-            member_economics_request = EconomicsUpdateRequest(
-                nr_of_shares=nr_of_shares,
-                total_investment=total_investment,
-                current_value=current_value,
-                reinvested=reinvested,
-                account_balance=account_balance,
-                pay_out=member.pay_out,
-                disbursed=disbursed,
-            )
-
-            update_economics(db, member.id, member_economics_request)
-
-        return {"detail": "dividend successfully completed"}
-
-    except IntegrityError as ex:
-        if "UniqueViolation" in str(ex):
-            raise HTTPException(
-                status_code=400,
-                detail=parse_integrity_error_msg("Key (.*?) exists", str(ex)),
-            ) from ex
-        if "violates foreign key" in str(ex):
-            raise HTTPException(
-                status_code=400,
-                detail=parse_integrity_error_msg("Key (.*?) not present", str(ex)),
-            ) from ex
-        raise HTTPException(status_code=400, detail="no dividend executed") from ex
-    except Exception as ex:
-        raise HTTPException(status_code=400, detail=f"no dividend executed, error:{ex}")
+    return {"message": "dividend started in the background"}

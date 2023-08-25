@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from solarpark.models.economics import EconomicsUpdateRequest
 from solarpark.models.shares import ShareCreateRequest, ShareCreateRequestImport, ShareUpdateRequest
 from solarpark.persistence.economics import get_economics_by_member, update_economics
+from solarpark.persistence.models.economics import Economics
 from solarpark.persistence.models.shares import Share
 
 
@@ -127,8 +128,36 @@ def update_share(db: Session, share_id: int, share_update: ShareUpdateRequest):
 
 
 def delete_share(db: Session, share_id: int) -> bool:
+    share = get_share(db, share_id)
+    if share and share["data"]:
+        member_id = share["data"][0].member_id
+    else:
+        return False
+
     deleted = db.query(Share).filter(Share.id == share_id).delete()
-    if deleted == 1:
+    if deleted != 1:
+        return False
+
+    member = get_economics_by_member(db, member_id)
+    if not member or not member["data"][0]:
+        return False
+
+    economics_update = EconomicsUpdateRequest(
+        nr_of_shares=member["data"][0].nr_of_shares - 1,
+        total_investment=member["data"][0].total_investment - share["data"][0].initial_value,
+        current_value=member["data"][0].current_value - share["data"][0].current_value,
+        reinvested=member["data"][0].reinvested,
+        account_balance=member["data"][0].account_balance,
+        pay_out=member["data"][0].pay_out,
+        disbursed=member["data"][0].disbursed,
+    )
+
+    db.query(Economics).filter(Economics.id == member["data"][0].id).update(economics_update.dict())
+    db.flush()
+
+    try:
         db.commit()
         return True
-    return False
+    except Exception:
+        db.rollback()
+        return False

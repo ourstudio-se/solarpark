@@ -57,37 +57,21 @@ def delete_lead(db: Session, lead_id):
 
 
 def create_lead(db: Session, lead_request: LeadCreateRequest):
-    if lead_request.existing_id:
-        lead = Lead(
-            firstname=lead_request.firstname,
-            lastname=lead_request.lastname,
-            birth_date=lead_request.birth_date,
-            org_name=lead_request.org_name,
-            org_number=lead_request.org_number,
-            street_address=lead_request.street_address,
-            zip_code=lead_request.zip_code,
-            locality=lead_request.locality,
-            email=lead_request.email,
-            telephone=lead_request.telephone,
-            existing_id=lead_request.existing_id,
-            quantity_shares=lead_request.quantity_shares,
-            generate_certificate=lead_request.generate_certificate,
-        )
-    else:
-        lead = Lead(
-            firstname=lead_request.firstname,
-            lastname=lead_request.lastname,
-            birth_date=lead_request.birth_date,
-            org_name=lead_request.org_name,
-            org_number=lead_request.org_number,
-            street_address=lead_request.street_address,
-            zip_code=lead_request.zip_code,
-            locality=lead_request.locality,
-            email=lead_request.email,
-            telephone=lead_request.telephone,
-            quantity_shares=lead_request.quantity_shares,
-            generate_certificate=lead_request.generate_certificate,
-        )
+    lead = Lead(
+        firstname=lead_request.firstname,
+        lastname=lead_request.lastname,
+        birth_date=lead_request.birth_date,
+        org_name=lead_request.org_name,
+        org_number=lead_request.org_number,
+        street_address=lead_request.street_address,
+        zip_code=lead_request.zip_code,
+        locality=lead_request.locality,
+        email=lead_request.email,
+        telephone=lead_request.telephone,
+        existing_id=lead_request.existing_id,
+        quantity_shares=lead_request.quantity_shares,
+        generate_certificate=lead_request.generate_certificate,
+    )
 
     db.add(lead)
     db.commit()
