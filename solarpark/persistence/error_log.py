@@ -40,7 +40,7 @@ def get_all_errors(db: Session, sort: List, range: List) -> Dict:
 
 
 def update_error(db: Session, error_id: int, error_update: ErrorLogUpdateRequest):
-    db.query(ErrorLog).filter(ErrorLog.id == error_id).update(error_update.dict())
+    db.query(ErrorLog).filter(ErrorLog.id == error_id).update(error_update.model_dump())
     db.commit()
     return db.query(ErrorLog).filter(ErrorLog.id == error_id).first()
 

@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     SENDGRID_API_KEY: str
     SHARE_PRICE: int = 3000
     ALLOW_ORIGINS: str = "http://localhost:5173;https://solarpark-test-env.netlify.app"
-    BATCH_SIZE: int = 20
+    ECONOMICS_BACKGROUND_BATCH: int = 20
 
 
 settings = Settings()

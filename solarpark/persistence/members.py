@@ -52,7 +52,7 @@ def count_all_members(db: Session, filter_on_org: bool = False):
 
 
 def update_member(db: Session, member_id: int, member_update: MemberUpdateRequest):
-    db.query(Member).filter(Member.id == member_id).update(member_update.dict())
+    db.query(Member).filter(Member.id == member_id).update(member_update.model_dump())
     db.commit()
     return db.query(Member).filter(Member.id == member_id).first()
 

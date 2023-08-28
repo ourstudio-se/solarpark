@@ -9,7 +9,13 @@ from sqlalchemy.orm import Session
 from solarpark.api import parse_integrity_error_msg
 from solarpark.models.payments import Payment, PaymentCreateRequest, Payments, PaymentUpdateRequest
 from solarpark.persistence.database import get_db
-from solarpark.persistence.payments import create_payment, get_all_payments, get_payment_id, update_payment_id
+from solarpark.persistence.payments import (
+    create_payment,
+    delete_payment,
+    get_all_payments,
+    get_payment_id,
+    update_payment_id,
+)
 
 router = APIRouter()
 
@@ -99,3 +105,13 @@ async def update_payment_endpoint(
                 detail=parse_integrity_error_msg("Key (.*?) not present", str(ex)),
             ) from ex
         raise HTTPException(status_code=400, detail="error updating payment") from ex
+
+
+@router.delete("/payments/{payment_id}", summary="Delete payment")
+async def delete_lead_endpoint(payment_id: int, db: Session = Depends(get_db)):
+    lead_deleted = delete_payment(db, payment_id)
+
+    if lead_deleted:
+        return {"detail": "payment deleted successfully"}
+
+    return {"detail": "payment not deleted"}

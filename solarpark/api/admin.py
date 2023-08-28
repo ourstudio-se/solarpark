@@ -182,7 +182,11 @@ async def get_analytics_endpoint(share_file: UploadFile = File(...), db: Session
         get_logger().error(f"{len(errors)} shares could not be imported, {errors}")
 
 
-@router.post("/create-economics-for-members", summary="Create economics for all members after import", status_code=202)
+@router.post(
+    "/create-economics-for-members",
+    summary="Create economics for all members after import",
+    status_code=202,
+)
 async def create_economics_endpoint(
     background_tasks: BackgroundTasks = BackgroundTasks(), db: Session = Depends(get_db)
 ):

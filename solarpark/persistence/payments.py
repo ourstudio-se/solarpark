@@ -39,7 +39,7 @@ def get_payments_by_year(db: Session, payment_year: int):
 
 
 def update_payment_id(db: Session, payment_id: int, payment_update: PaymentUpdateRequest):
-    db.query(Payment).filter(Payment.id == payment_id).update(payment_update.dict())
+    db.query(Payment).filter(Payment.id == payment_id).update(payment_update.model_dump())
     db.commit()
     return db.query(Payment).filter(Payment.id == payment_id).first()
 
@@ -64,8 +64,16 @@ def get_all_payments(db: Session, sort: List, range: List) -> Dict:
             "data": db.query(Payment).order_by(Payment.id).offset(range[0]).limit(range[1]).all(),
             "total": total_count,
         }
-    # "data": db.query(Member).order_by(Member.id).offset(0).limit(10).all()
+
     return {
         "data": db.query(Payment).order_by(Payment.id).offset(0).limit(10).all(),
         "total": total_count,
     }
+
+
+def delete_payment(db: Session, payment_id: int):
+    deleted = db.query(Payment).filter(Payment.id == payment_id).delete()
+    if deleted == 1:
+        db.commit()
+        return True
+    return False

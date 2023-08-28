@@ -30,7 +30,7 @@ def get_dividend_by_year(db: Session, dividend_year: int):
 
 
 def update_dividend(db: Session, dividend_id: int, dividend_update: DividendUpdateRequest):
-    db.query(Dividend).filter(Dividend.id == dividend_id).update(dividend_update.dict())
+    db.query(Dividend).filter(Dividend.id == dividend_id).update(dividend_update.model_dump())
     db.commit()
     return db.query(Dividend).filter(Dividend.id == dividend_id).first()
 

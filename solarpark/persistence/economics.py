@@ -36,7 +36,7 @@ def get_economics_by_member(db: Session, member_id: int):
 
 
 def update_economics(db: Session, economics_id: int, economics_update: EconomicsUpdateRequest):
-    db.query(Economics).filter(Economics.id == economics_id).update(economics_update.dict())
+    db.query(Economics).filter(Economics.id == economics_id).update(economics_update.model_dump())
     db.commit()
     return db.query(Economics).filter(Economics.id == economics_id).first()
 

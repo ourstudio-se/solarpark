@@ -6,8 +6,10 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from solarpark.models.economics import EconomicsUpdateRequest
+from solarpark.models.error_log import ErrorLogCreateRequest
 from solarpark.models.shares import ShareCreateRequest, ShareCreateRequestImport, ShareUpdateRequest
 from solarpark.persistence.economics import get_economics_by_member, update_economics
+from solarpark.persistence.error_log import create_error
 from solarpark.persistence.models.economics import Economics
 from solarpark.persistence.models.shares import Share
 
@@ -98,12 +100,12 @@ def update_share(db: Session, share_id: int, share_update: ShareUpdateRequest):
     share_before_update = get_share(db, share_id)
 
     if share_before_update["data"][0].member_id == share_update.member_id:
-        db.query(Share).filter(Share.id == share_id).update(share_update.dict())
+        db.query(Share).filter(Share.id == share_id).update(share_update.model_dump())
         db.commit()
         return db.query(Share).filter(Share.id == share_id).first()
 
     members_id = [share_before_update["data"][0].member_id, share_update.member_id]
-    db.query(Share).filter(Share.id == share_id).update(share_update.dict())
+    db.query(Share).filter(Share.id == share_id).update(share_update.model_dump())
     db.commit()
 
     for member_id in members_id:
@@ -152,12 +154,20 @@ def delete_share(db: Session, share_id: int) -> bool:
         disbursed=member["data"][0].disbursed,
     )
 
-    db.query(Economics).filter(Economics.id == member["data"][0].id).update(economics_update.dict())
+    db.query(Economics).filter(Economics.id == member["data"][0].id).update(economics_update.model_dump())
     db.flush()
 
     try:
         db.commit()
         return True
-    except Exception:
+    except Exception as ex:
         db.rollback()
+        error_request = ErrorLogCreateRequest(
+            share_id=share_id,
+            member_id=member_id,
+            comment=f"Error: no deleting of share {share_id}, details: {ex}",
+            resolved=False,
+        )
+        create_error(db, error_request)
+
         return False

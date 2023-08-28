@@ -22,7 +22,7 @@ def make_dividend(db: Session, amount: float, payment_year: int, nr_of_economics
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     db_error = SessionLocal()
 
-    batch_size = settings.BATCH_SIZE
+    batch_size = settings.ECONOMICS_BACKGROUND_BATCH
     for i in range(0, nr_of_economics, batch_size):
         members_economics = get_all_economics(db, sort=[], range=[i, batch_size])
 
@@ -39,7 +39,8 @@ def make_dividend(db: Session, amount: float, payment_year: int, nr_of_economics
 
             if not shares["total"] or not shares["data"]:
                 error_request = ErrorLogCreateRequest(
-                    comment=f"Error: no shares found, no dividends done for member {member.member_id}",
+                    member_id=member.member_id,
+                    comment="Error: no shares found, no dividends done",
                     resolved=False,
                 )
                 create_error(db_error, error_request)
@@ -59,7 +60,7 @@ def make_dividend(db: Session, amount: float, payment_year: int, nr_of_economics
                     current_value=current_value,
                 )
 
-                db.query(Share).filter(Share.id == share.id).update(share_update.dict())
+                db.query(Share).filter(Share.id == share.id).update(share_update.model_dump())
                 db.flush()
 
             nr_of_shares = shares["total"]
@@ -94,7 +95,7 @@ def make_dividend(db: Session, amount: float, payment_year: int, nr_of_economics
                 disbursed=disbursed,
             )
 
-            db.query(Economics).filter(Economics.id == member.id).update(economics_update.dict())
+            db.query(Economics).filter(Economics.id == member.id).update(economics_update.model_dump())
             db.flush()
 
             nr_reinvest_shares = int(member.account_balance // settings.SHARE_PRICE)
@@ -127,15 +128,16 @@ def make_dividend(db: Session, amount: float, payment_year: int, nr_of_economics
                     disbursed=disbursed,
                 )
 
-                db.query(Economics).filter(Economics.id == member.id).update(economics_update.dict())
+                db.query(Economics).filter(Economics.id == member.id).update(economics_update.model_dump())
                 db.flush()
 
             try:
                 db.commit()
-            except Exception:
+            except Exception as ex:
                 db.rollback()
                 error_request = ErrorLogCreateRequest(
-                    comment=f"Error: no dividend done for member {member.member_id}",
+                    member_id=member.member_id,
+                    comment=f"Error: no dividend done, details: {ex}",
                     resolved=False,
                 )
                 create_error(db_error, error_request)

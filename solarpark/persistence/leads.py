@@ -80,7 +80,7 @@ def create_lead(db: Session, lead_request: LeadCreateRequest):
 
 
 def update_lead(db: Session, lead_id: int, lead_update: LeadUpdateRequest):
-    db.query(Lead).filter(Lead.id == lead_id).update(lead_update.dict())
+    db.query(Lead).filter(Lead.id == lead_id).update(lead_update.model_dump())
     db.commit()
     return db.query(Lead).filter(Lead.id == lead_id).first()
 
