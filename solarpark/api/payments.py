@@ -108,7 +108,7 @@ async def update_payment_endpoint(
 
 
 @router.delete("/payments/{payment_id}", summary="Delete payment")
-async def delete_lead_endpoint(payment_id: int, db: Session = Depends(get_db)):
+async def delete_payment_endpoint(payment_id: int, db: Session = Depends(get_db)):
     lead_deleted = delete_payment(db, payment_id)
 
     if lead_deleted:
