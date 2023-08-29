@@ -53,10 +53,10 @@ def get_shares_by_member(db: Session, member_id: int):
     return {"data": result, "total": len(result)}
 
 
-def count_all_shares(db: Session, filter_on_org: bool = False):
-    if filter_on_org:
-        return db.query(Share).filter(Share.org_number != None).count()  # noqa: E711
-    return db.query(Share).count()
+def count_all_shares(db: Session):
+    all_shares = db.query(Share).count()
+    reinvested_shares = db.query(Share).filter(Share.comment.contains("From internal account")).count()
+    return all_shares, reinvested_shares
 
 
 def delete_shares_by_member(db: Session, member_id: int):

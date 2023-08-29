@@ -12,6 +12,7 @@ def create_dividend(db: Session, dividend_request: DividendCreateRequest):
     dividend = Dividend(
         dividend_per_share=dividend_request.dividend_per_share,
         payment_year=dividend_request.payment_year,
+        completed=dividend_request.completed,
     )
     db.add(dividend)
     db.commit()

@@ -26,7 +26,7 @@ async def get_analytics_endpoint(db: Session = Depends(get_db)):
     """
     all_members = count_all_members(db, filter_on_org=False)
     all_member_organizations = count_all_members(db, filter_on_org=True)
-    all_shares = count_all_shares(db)
+    all_shares, reinvested_shares = count_all_shares(db)
 
     return {
         "members": {
@@ -36,6 +36,8 @@ async def get_analytics_endpoint(db: Session = Depends(get_db)):
         },
         "shares": {
             "total_count": all_shares,
+            "reinvested_count": reinvested_shares,
+            "reinvested_value": reinvested_shares * settings.SHARE_PRICE,
             "total_value": all_shares * settings.SHARE_PRICE,
             "average_share_count_per_member": round(all_shares / all_members),
         },

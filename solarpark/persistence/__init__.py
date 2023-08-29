@@ -5,11 +5,13 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from solarpark.models.dividends import DividendUpdateRequest
 from solarpark.models.economics import EconomicsUpdateRequest
 from solarpark.models.error_log import ErrorLogCreateRequest
 from solarpark.models.shares import ShareUpdateRequest
 from solarpark.persistence.economics import get_all_economics
 from solarpark.persistence.error_log import create_error
+from solarpark.persistence.models.dividends import Dividend
 from solarpark.persistence.models.economics import Economics
 from solarpark.persistence.models.payments import Payment
 from solarpark.persistence.models.shares import Share
@@ -129,6 +131,7 @@ def make_dividend(db: Session, amount: float, payment_year: int, nr_of_economics
                 )
 
                 db.query(Economics).filter(Economics.id == member.id).update(economics_update.model_dump())
+
                 db.flush()
 
             try:
@@ -141,6 +144,8 @@ def make_dividend(db: Session, amount: float, payment_year: int, nr_of_economics
                     resolved=False,
                 )
                 create_error(db_error, error_request)
+        dividend_update = DividendUpdateRequest(dividend_per_share=amount, payment_year=payment_year, completed=True)
+        db.query(Dividend).filter(Dividend.payment_year == payment_year).update(dividend_update.model_dump())
 
     db_error.close()
     print("Done!")
