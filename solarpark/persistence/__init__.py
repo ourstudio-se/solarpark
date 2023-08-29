@@ -60,6 +60,7 @@ def make_dividend(db: Session, amount: float, payment_year: int, nr_of_economics
                     member_id=share.member_id,
                     initial_value=share.initial_value,
                     current_value=current_value,
+                    from_internal_account=share.from_internal_account,
                 )
 
                 db.query(Share).filter(Share.id == share.id).update(share_update.model_dump())
@@ -104,11 +105,11 @@ def make_dividend(db: Session, amount: float, payment_year: int, nr_of_economics
             if nr_reinvest_shares > 0:
                 for _ in range(nr_reinvest_shares):
                     share = Share(
-                        comment="From internal account",
                         member_id=member.member_id,
                         initial_value=settings.SHARE_PRICE,
                         current_value=settings.SHARE_PRICE,
                         purchased_at=datetime.now(),
+                        from_internal_account=True,
                     )
                     db.add(share)
                     db.flush()
@@ -144,6 +145,7 @@ def make_dividend(db: Session, amount: float, payment_year: int, nr_of_economics
                     resolved=False,
                 )
                 create_error(db_error, error_request)
+
         dividend_update = DividendUpdateRequest(dividend_per_share=amount, payment_year=payment_year, completed=True)
         db.query(Dividend).filter(Dividend.payment_year == payment_year).update(dividend_update.model_dump())
 

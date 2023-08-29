@@ -168,6 +168,7 @@ async def get_analytics_endpoint(share_file: UploadFile = File(...), db: Session
                         comment=row["Amn."].strip(),
                         initial_value=settings.SHARE_PRICE,
                         current_value=row["Andelsvärde"] if row["Andelsvärde"] else settings.SHARE_PRICE,
+                        from_internal_account=False,
                     )
 
                     create_share_import(db, new_share)

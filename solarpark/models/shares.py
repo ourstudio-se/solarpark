@@ -13,6 +13,7 @@ class Share(BaseModel):
     member_id: int
     initial_value: float
     current_value: Optional[float] = None
+    from_internal_account: bool
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -29,6 +30,7 @@ class ShareCreateRequestImport(BaseModel):
     member_id: int
     initial_value: float
     current_value: float
+    from_internal_account: bool
 
 
 class Shares(BaseModel):
@@ -44,6 +46,7 @@ class ShareUpdateRequest(BaseModel):
     member_id: int
     initial_value: float
     current_value: float
+    from_internal_account: bool
 
 
 class ShareCreateRequest(BaseModel):
@@ -51,3 +54,4 @@ class ShareCreateRequest(BaseModel):
     purchased_at: datetime
     member_id: int
     initial_value: float
+    from_internal_account: bool

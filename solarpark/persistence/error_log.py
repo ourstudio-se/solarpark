@@ -64,3 +64,7 @@ def create_error(db: Session, error_request: ErrorLogCreateRequest):
     db.commit()
     db.refresh(error)
     return error
+
+
+def get_all_unresolved_errors(db: Session):
+    return db.query(ErrorLog).filter(ErrorLog.resolved != True).count()  # noqa: E712

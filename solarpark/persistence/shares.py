@@ -2,7 +2,7 @@
 
 from typing import Dict, List
 
-from sqlalchemy import text
+from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
 from solarpark.models.economics import EconomicsUpdateRequest
@@ -11,6 +11,7 @@ from solarpark.models.shares import ShareCreateRequest, ShareCreateRequestImport
 from solarpark.persistence.economics import get_economics_by_member, update_economics
 from solarpark.persistence.error_log import create_error
 from solarpark.persistence.models.economics import Economics
+from solarpark.persistence.models.members import Member
 from solarpark.persistence.models.shares import Share
 
 
@@ -55,8 +56,17 @@ def get_shares_by_member(db: Session, member_id: int):
 
 def count_all_shares(db: Session):
     all_shares = db.query(Share).count()
-    reinvested_shares = db.query(Share).filter(Share.comment.contains("From internal account")).count()
-    return all_shares, reinvested_shares
+    reinvested_shares = db.query(Share).filter(Share.from_internal_account == True).count()  # noqa: E712
+    org_more_than_one_share = (
+        db.query(Member)
+        .join(Share, Member.id == Share.member_id)
+        .filter(Member.org_name != None)  # noqa: E711
+        .group_by(Member.id)
+        .having(func.count(Share.id) > 1)
+        .count()
+    )
+
+    return all_shares, reinvested_shares, org_more_than_one_share
 
 
 def delete_shares_by_member(db: Session, member_id: int):
@@ -75,6 +85,7 @@ def create_share_import(db: Session, share_request: ShareCreateRequestImport):
         current_value=share_request.current_value,
         purchased_at=share_request.purchased_at,
         comment=share_request.comment,
+        from_internal_account=share_request.from_internal_account,
     )
     db.add(share)
     db.commit()
@@ -89,6 +100,7 @@ def create_share(db: Session, share_request: ShareCreateRequest):
         initial_value=share_request.initial_value,
         current_value=share_request.initial_value,
         purchased_at=share_request.purchased_at,
+        from_internal_account=False,
     )
     db.add(share)
     db.commit()

@@ -1,9 +1,10 @@
 # pylint: disable=singleton-comparison,W0622
 
 
+from datetime import datetime
 from typing import Dict, List
 
-from sqlalchemy import text
+from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
 from solarpark.models.payments import PaymentCreateRequest, PaymentUpdateRequest
@@ -77,3 +78,7 @@ def delete_payment(db: Session, payment_id: int):
         db.commit()
         return True
     return False
+
+
+def get_year_payments(db: Session):
+    return int(db.query(func.sum(Payment.amount)).filter(Payment.year == datetime.now().year).scalar())

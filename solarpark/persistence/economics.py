@@ -1,7 +1,7 @@
 # pylint: disable=singleton-comparison,W0622
 from typing import Dict, List
 
-from sqlalchemy import text
+from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
 from solarpark.models.economics import EconomicsCreateRequest, EconomicsUpdateRequest
@@ -82,3 +82,11 @@ def delete_economics_by_member(db: Session, member_id: int) -> bool:
         db.commit()
         return True
     return False
+
+
+def get_total_disbursed(db: Session):
+    return int(db.query(func.sum(Economics.disbursed)).scalar())
+
+
+def get_total_account_balance(db: Session):
+    return int(db.query(func.sum(Economics.account_balance)).scalar())
