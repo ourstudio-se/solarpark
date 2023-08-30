@@ -49,6 +49,11 @@ def get_share(db: Session, share_id: int):
     return {"data": result, "total": len(result)}
 
 
+def get_share_by_list_ids(db: Session, share_ids: list):
+    result = db.query(Share).filter(Share.id.in_(share_ids)).all()
+    return {"data": result, "total": len(result)}
+
+
 def get_shares_by_member(db: Session, member_id: int):
     result = db.query(Share).filter(Share.member_id == member_id).all()
     return {"data": result, "total": len(result)}

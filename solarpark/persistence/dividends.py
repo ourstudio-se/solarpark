@@ -25,6 +25,11 @@ def get_dividend_by_id(db: Session, dividend_id: int):
     return {"data": result, "total": len(result)}
 
 
+def get_dividend_by_list_ids(db: Session, dividend_ids: list):
+    result = db.query(Dividend).filter(Dividend.id.in_(dividend_ids)).all()
+    return {"data": result, "total": len(result)}
+
+
 def get_dividend_by_year(db: Session, dividend_year: int):
     result = db.query(Dividend).filter(Dividend.payment_year == dividend_year).all()
     return {"data": result, "total": len(result)}

@@ -9,7 +9,14 @@ from sqlalchemy.orm import Session
 from solarpark.api import parse_integrity_error_msg
 from solarpark.models.error_log import ErrorLog, ErrorLogCreateRequest, ErrorLogs, ErrorLogUpdateRequest
 from solarpark.persistence.database import get_db
-from solarpark.persistence.error_log import create_error, delete_error, get_all_errors, get_error, update_error
+from solarpark.persistence.error_log import (
+    create_error,
+    delete_error,
+    get_all_errors,
+    get_error,
+    get_error_by_list_ids,
+    update_error,
+)
 
 router = APIRouter()
 
@@ -47,7 +54,7 @@ async def get_errors_endpoint(
 
         if filter_obj and "id" in filter_obj:
             if isinstance(filter_obj["id"], list):
-                return get_error(db, filter_obj["id"][0])
+                return get_error_by_list_ids(db, filter_obj["id"])
             return get_error(db, filter_obj["id"])
 
         return get_all_errors(db, sort=sort_obj, range=range_obj)

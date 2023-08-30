@@ -14,6 +14,7 @@ from solarpark.persistence.shares import (
     delete_share,
     get_all_shares,
     get_share,
+    get_share_by_list_ids,
     get_shares_by_member,
     update_share,
 )
@@ -51,7 +52,7 @@ async def get_shares_endpoint(
 
         if filter_obj and "id" in filter_obj:
             if isinstance(filter_obj["id"], list):
-                return get_share(db, filter_obj["id"][0])
+                return get_share_by_list_ids(db, filter_obj["id"])
             return get_share(db, filter_obj["id"])
         if filter_obj and "member_id" in filter_obj:
             return get_shares_by_member(db, filter_obj["member_id"])

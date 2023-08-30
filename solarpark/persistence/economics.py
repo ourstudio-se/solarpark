@@ -30,6 +30,11 @@ def get_economics(db: Session, economics_id: int):
     return {"data": result, "total": len(result)}
 
 
+def get_economics_by_list_ids(db: Session, economics_ids: list):
+    result = db.query(Economics).filter(Economics.id.in_(economics_ids)).all()
+    return {"data": result, "total": len(result)}
+
+
 def get_economics_by_member(db: Session, member_id: int):
     result = db.query(Economics).filter(Economics.member_id == member_id).all()
     return {"data": result, "total": len(result)}

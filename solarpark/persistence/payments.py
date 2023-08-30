@@ -29,6 +29,11 @@ def get_payment_id(db: Session, payment_id: int):
     return {"data": result, "total": len(result)}
 
 
+def get_payment_by_list_ids(db: Session, payment_ids: list):
+    result = db.query(Payment).filter(Payment.id.in_(payment_ids)).all()
+    return {"data": result, "total": len(result)}
+
+
 def get_payment_by_member_id(db: Session, member_id: int):
     result = db.query(Payment).filter(Payment.member_id == member_id).all()
     return {"data": result, "total": len(result)}
@@ -81,4 +86,9 @@ def delete_payment(db: Session, payment_id: int):
 
 
 def get_year_payments(db: Session):
-    return int(db.query(func.sum(Payment.amount)).filter(Payment.year == datetime.now().year).scalar())
+    return int(
+        db.query(func.sum(Payment.amount))
+        .filter(Payment.year == datetime.now().year)
+        .filter(Payment.paid_out != True)  # noqa: E712
+        .scalar()
+    )

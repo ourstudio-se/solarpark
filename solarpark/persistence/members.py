@@ -9,12 +9,26 @@ from solarpark.persistence.models.members import Member
 
 
 def find_member(db: Session, term: str):
-    result = db.query(Member).filter(Member.firstname.ilike(f"%{term}%") | Member.lastname.ilike(f"%{term}%")).all()
+    result = (
+        db.query(Member)
+        .filter(
+            Member.firstname.ilike(f"%{term}%")
+            | Member.lastname.ilike(f"%{term}%")
+            | Member.org_name.ilike(f"%{term}%")
+            | Member.email.ilike(f"%{term}%")
+        )
+        .all()
+    )
     return {"data": result, "total": len(result)}
 
 
 def get_member(db: Session, member_id: int):
     result = db.query(Member).filter(Member.id == member_id).all()
+    return {"data": result, "total": len(result)}
+
+
+def get_member_by_list_ids(db: Session, member_ids: list):
+    result = db.query(Member).filter(Member.id.in_(member_ids)).all()
     return {"data": result, "total": len(result)}
 
 

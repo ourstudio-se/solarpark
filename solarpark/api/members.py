@@ -16,6 +16,7 @@ from solarpark.persistence.members import (
     find_member,
     get_all_members,
     get_member,
+    get_member_by_list_ids,
     update_member,
 )
 from solarpark.persistence.shares import delete_shares_by_member, get_shares_by_member
@@ -64,7 +65,7 @@ async def get_members_endpoint(
 
         if filter_obj and "id" in filter_obj:
             if isinstance(filter_obj["id"], list):
-                return get_member(db, filter_obj["id"][0])
+                return get_member_by_list_ids(db, filter_obj["id"])
             return get_member(db, filter_obj["id"])
         if filter_obj and "q" in filter_obj:
             return find_member(db, filter_obj["q"])

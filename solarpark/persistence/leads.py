@@ -6,7 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from solarpark.models.economics import EconomicsCreateRequest, EconomicsUpdateRequest
-from solarpark.models.leads import LeadCreateRequest, LeadUpdateRequest  # , LeadApproveRequest
+from solarpark.models.leads import LeadCreateRequest, LeadUpdateRequest
 from solarpark.models.members import MemberCreateRequest
 from solarpark.models.shares import ShareCreateRequest
 from solarpark.persistence.economics import create_economics, get_economics_by_member, update_economics
@@ -16,8 +16,27 @@ from solarpark.persistence.shares import create_share
 from solarpark.settings import settings
 
 
+def find_lead(db: Session, term: str):
+    result = (
+        db.query(Lead)
+        .filter(
+            Lead.firstname.ilike(f"%{term}%")
+            | Lead.lastname.ilike(f"%{term}%")
+            | Lead.org_name.ilike(f"%{term}%")
+            | Lead.email.ilike(f"%{term}%")
+        )
+        .all()
+    )
+    return {"data": result, "total": len(result)}
+
+
 def get_lead(db: Session, lead_id: int):
     result = db.query(Lead).filter(Lead.id == lead_id).all()
+    return {"data": result, "total": len(result)}
+
+
+def get_lead_by_list_ids(db: Session, lead_ids: list):
+    result = db.query(Lead).filter(Lead.id.in_(lead_ids)).all()
     return {"data": result, "total": len(result)}
 
 
@@ -164,7 +183,3 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
 
     delete_lead(db, lead_id)
     return True
-
-    # Todo
-    # Ta bort lead från databasen för godkänd/icke godkänd medlem
-    # Om godkänd, lägg till i member och share

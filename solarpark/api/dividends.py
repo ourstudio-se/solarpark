@@ -14,6 +14,7 @@ from solarpark.persistence.dividends import (
     delete_dividend,
     get_all_dividends,
     get_dividend_by_id,
+    get_dividend_by_list_ids,
     get_dividend_by_year,
     update_dividend,
 )
@@ -63,7 +64,6 @@ async def get_dividends_endpoint(
     db: Session = Depends(get_db),
 ) -> Dividends:
     try:
-        # Här förstår jag inte
         filter_obj = {}
         sort_obj = []
         range_obj = []
@@ -77,7 +77,7 @@ async def get_dividends_endpoint(
 
         if filter_obj and "id" in filter_obj:
             if isinstance(filter_obj["id"], list):
-                return get_dividend_by_id(db, filter_obj["id"][0])
+                return get_dividend_by_list_ids(db, filter_obj["id"])
             return get_dividend_by_id(db, filter_obj["id"])
 
         return get_all_dividends(db, sort=sort_obj, range=range_obj)

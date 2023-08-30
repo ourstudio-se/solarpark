@@ -9,7 +9,16 @@ from sqlalchemy.orm import Session
 from solarpark.api import parse_integrity_error_msg
 from solarpark.models.leads import Lead, LeadCreateRequest, Leads, LeadUpdateRequest
 from solarpark.persistence.database import get_db
-from solarpark.persistence.leads import approve_lead, create_lead, delete_lead, get_all_leads, get_lead, update_lead
+from solarpark.persistence.leads import (
+    approve_lead,
+    create_lead,
+    delete_lead,
+    find_lead,
+    get_all_leads,
+    get_lead,
+    get_lead_by_list_ids,
+    update_lead,
+)
 
 router = APIRouter()
 
@@ -47,9 +56,10 @@ async def get_leads_endpoint(
 
         if filter_obj and "id" in filter_obj:
             if isinstance(filter_obj["id"], list):
-                return get_lead(db, filter_obj["id"][0])
+                return get_lead_by_list_ids(db, filter_obj["id"])
             return get_lead(db, filter_obj["id"])
-
+        if filter_obj and "q" in filter_obj:
+            return find_lead(db, filter_obj["q"])
         return get_all_leads(db, sort=sort_obj, range=range_obj)
     except json.JSONDecodeError as ex:
         raise HTTPException(status_code=400, detail="error decoding filter, sort or range parameters") from ex

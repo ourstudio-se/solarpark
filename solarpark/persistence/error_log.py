@@ -13,6 +13,11 @@ def get_error(db: Session, error_id: int):
     return {"data": result, "total": len(result)}
 
 
+def get_error_by_list_ids(db: Session, error_ids: list):
+    result = db.query(ErrorLog).filter(ErrorLog.id.in_(error_ids)).all()
+    return {"data": result, "total": len(result)}
+
+
 def get_all_errors(db: Session, sort: List, range: List) -> Dict:
     total_count = db.query(ErrorLog).count()
 

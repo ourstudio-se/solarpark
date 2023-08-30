@@ -13,6 +13,8 @@ from solarpark.persistence.payments import (
     create_payment,
     delete_payment,
     get_all_payments,
+    get_payment_by_list_ids,
+    get_payment_by_member_id,
     get_payment_id,
     update_payment_id,
 )
@@ -61,8 +63,6 @@ async def get_payments_endpoint(
     db: Session = Depends(get_db),
 ) -> Payments:
     try:
-        # Här förstår jag inte
-
         filter_obj = {}
         sort_obj = []
         range_obj = []
@@ -76,9 +76,10 @@ async def get_payments_endpoint(
 
         if filter_obj and "id" in filter_obj:
             if isinstance(filter_obj["id"], list):
-                return get_payment_id(db, filter_obj["id"][0])
+                return get_payment_by_list_ids(db, filter_obj["id"])
             return get_payment_id(db, filter_obj["id"])
-
+        if filter_obj and "member_id" in filter_obj:
+            return get_payment_by_member_id(db, filter_obj["member_id"])
         return get_all_payments(db, sort=sort_obj, range=range_obj)
 
     except Exception as ex:
