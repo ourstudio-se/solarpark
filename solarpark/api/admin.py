@@ -2,7 +2,7 @@ import csv
 from datetime import datetime
 from io import StringIO
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 from structlog import get_logger
 
@@ -82,22 +82,19 @@ def create_economics_for_all_members(db: Session):
         offset += limit
 
 
-@router.post("/import-members", summary="Import members from csv")
-async def import_members(member_file: UploadFile = File(...), db: Session = Depends(get_db)):
+@router.post("/import-members", summary="Import members from csv", status_code=202)
+async def import_members(
+    member_file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks(),
+    db: Session = Depends(get_db),
+):
     """
     Upload CSV-file with members
     """
-    reader = None
-    try:
-        contents = member_file.file.read()
-        buffer = StringIO(contents.decode("utf-8"))
-        reader = csv.DictReader(buffer)
-    except Exception as ex:
-        get_logger().error(f"error reading csv-file: {ex}")
 
-    errors = []
-    if reader:
-        for row in reader:
+    def member_logic(db: Session, dict_reader: csv.DictReader):
+        errors = []
+        for row in dict_reader:
             try:
                 if len(row) == 18:
                     if "-" in row["Födelsedatum"] or len(row["Födelsedatum"]) > 8:
@@ -138,27 +135,34 @@ async def import_members(member_file: UploadFile = File(...), db: Session = Depe
                 errors.append(row["Medlemnr"])
                 continue
 
-    if errors:
-        get_logger().error(f"{len(errors)} members could not be imported, {errors}")
+        if errors:
+            get_logger().error(f"{len(errors)} members could not be imported, {errors}")
+
+    reader = None
+    try:
+        contents = member_file.file.read()
+        buffer = StringIO(contents.decode("utf-8"))
+        reader = csv.DictReader(buffer)
+        if reader:
+            background_tasks.add_task(member_logic, db, reader)
+    except Exception as ex:
+        get_logger().error(f"error reading csv-file: {ex}")
+        raise HTTPException(status_code=400, detail="error reading csv file, see logs for more info") from ex
 
 
-@router.post("/import-shares", summary="Import shares from csv")
-async def get_analytics_endpoint(share_file: UploadFile = File(...), db: Session = Depends(get_db)):
+@router.post("/import-shares", summary="Import shares from csv", status_code=202)
+async def get_analytics_endpoint(
+    share_file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks(),
+    db: Session = Depends(get_db),
+):
     """
     Upload CSV-file with member shares
     """
 
-    reader = None
-    try:
-        contents = share_file.file.read()
-        buffer = StringIO(contents.decode("utf-8"))
-        reader = csv.DictReader(buffer)
-    except Exception as ex:
-        get_logger().error(f"error reading csv-file: {ex}")
-
-    errors = []
-    if reader:
-        for row in reader:
+    def share_logic(db: Session, dict_reader: csv.DictReader):
+        errors = []
+        for row in dict_reader:
             try:
                 if len(row) == 12:
                     new_share = ShareCreateRequestImport(
@@ -167,7 +171,7 @@ async def get_analytics_endpoint(share_file: UploadFile = File(...), db: Session
                         purchased_at=datetime.strptime(row["Datum"].strip(), "%y%m%d"),
                         comment=row["Amn."].strip(),
                         initial_value=settings.SHARE_PRICE,
-                        current_value=row["Andelsvärde"] if row["Andelsvärde"] else settings.SHARE_PRICE,
+                        current_value=settings.SHARE_PRICE,
                         from_internal_account=False,
                     )
 
@@ -179,8 +183,19 @@ async def get_analytics_endpoint(share_file: UploadFile = File(...), db: Session
                 errors.append(row["Andel nr"])
                 continue
 
-    if errors:
-        get_logger().error(f"{len(errors)} shares could not be imported, {errors}")
+        if errors:
+            get_logger().error(f"{len(errors)} shares could not be imported, {errors}")
+
+    reader = None
+    try:
+        contents = share_file.file.read()
+        buffer = StringIO(contents.decode("utf-8"))
+        reader = csv.DictReader(buffer)
+        if reader:
+            background_tasks.add_task(share_logic, db, reader)
+    except Exception as ex:
+        get_logger().error(f"error reading csv-file: {ex}")
+        raise HTTPException(status_code=400, detail="error reading csv file, see logs for more info") from ex
 
 
 @router.post(

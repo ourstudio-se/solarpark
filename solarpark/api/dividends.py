@@ -1,5 +1,6 @@
 # pylint: disable=W0511, W0622, R0914, R1721, W0707,R1731
 import json
+from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
@@ -119,6 +120,7 @@ async def delete_dividend_endpoint(dividend_id: int, db: Session = Depends(get_d
 @router.put("/dividends/fulfill/{payment_year}", summary="Carry out dividend")
 async def make_dividend_endpoint(
     payment_year: int,
+    is_historical_fulfillment: Optional[bool] = False,
     db: Session = Depends(get_db),
     background_tasks: BackgroundTasks = BackgroundTasks(),
 ):
@@ -136,6 +138,8 @@ async def make_dividend_endpoint(
     else:
         raise HTTPException(status_code=400, detail="economics not found")
 
-    background_tasks.add_task(make_dividend, db, amount, payment_year, nr_of_economics)
+    background_tasks.add_task(
+        make_dividend, db, amount, payment_year, nr_of_economics, is_historical_fulfillment=is_historical_fulfillment
+    )
 
     return {"message": "dividend started in the background"}

@@ -59,6 +59,11 @@ def get_shares_by_member(db: Session, member_id: int):
     return {"data": result, "total": len(result)}
 
 
+def get_shares_by_member_and_purchase_year(db: Session, member_id: int, year: int):
+    result = db.query(Share).filter(Share.member_id == member_id and Share.purchased_at < year).all()
+    return {"data": result, "total": len(result)}
+
+
 def count_all_shares(db: Session):
     all_shares = db.query(Share).count()
     reinvested_shares = db.query(Share).filter(Share.from_internal_account == True).count()  # noqa: E712
