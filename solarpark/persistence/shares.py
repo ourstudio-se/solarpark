@@ -2,7 +2,7 @@
 
 from typing import Dict, List
 
-from sqlalchemy import func, text
+from sqlalchemy import extract, func, text
 from sqlalchemy.orm import Session
 
 from solarpark.models.economics import EconomicsUpdateRequest
@@ -60,7 +60,9 @@ def get_shares_by_member(db: Session, member_id: int):
 
 
 def get_shares_by_member_and_purchase_year(db: Session, member_id: int, year: int):
-    result = db.query(Share).filter(Share.member_id == member_id and Share.purchased_at < year).all()
+    result = (
+        db.query(Share).filter(Share.member_id == member_id).filter(extract("year", Share.purchased_at) < year).all()
+    )
     return {"data": result, "total": len(result)}
 
 

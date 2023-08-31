@@ -20,23 +20,13 @@ from solarpark.logging import get_logger
 
 def add_routes(app) -> None:
     app.include_router(
-        error_log.router,
-        tags=["error log"],
+        admin.router,
+        tags=["admin"],
         dependencies=[Depends(get_logger), Depends(api_security)],
     )
     app.include_router(
-        send_email.router,
-        tags=["send_email"],
-        dependencies=[Depends(get_logger), Depends(api_security)],
-    )
-    app.include_router(
-        generate.router,
-        tags=["generate"],
-        dependencies=[Depends(get_logger), Depends(api_security)],
-    )
-    app.include_router(
-        payments.router,
-        tags=["payments"],
+        analytics.router,
+        tags=["analytics"],
         dependencies=[Depends(get_logger), Depends(api_security)],
     )
     app.include_router(
@@ -50,18 +40,13 @@ def add_routes(app) -> None:
         dependencies=[Depends(get_logger), Depends(api_security)],
     )
     app.include_router(
-        members.router,
-        tags=["members"],
+        error_log.router,
+        tags=["error log"],
         dependencies=[Depends(get_logger), Depends(api_security)],
     )
     app.include_router(
-        shares.router,
-        tags=["shares"],
-        dependencies=[Depends(get_logger), Depends(api_security)],
-    )
-    app.include_router(
-        leads.router,
-        tags=["leads"],
+        generate.router,
+        tags=["generate"],
         dependencies=[Depends(get_logger), Depends(api_security)],
     )
     app.include_router(
@@ -70,12 +55,27 @@ def add_routes(app) -> None:
         dependencies=[Depends(get_logger)],
     )
     app.include_router(
-        analytics.router,
-        tags=["analytics"],
+        members.router,
+        tags=["members"],
         dependencies=[Depends(get_logger), Depends(api_security)],
     )
     app.include_router(
-        admin.router,
-        tags=["admin"],
+        leads.router,
+        tags=["leads"],
+        dependencies=[Depends(get_logger), Depends(api_security)],
+    )
+    app.include_router(
+        payments.router,
+        tags=["payments"],
+        dependencies=[Depends(get_logger), Depends(api_security)],
+    )
+    app.include_router(
+        send_email.router,
+        tags=["send_email"],
+        dependencies=[Depends(get_logger), Depends(api_security)],
+    )
+    app.include_router(
+        shares.router,
+        tags=["shares"],
         dependencies=[Depends(get_logger), Depends(api_security)],
     )

@@ -1,4 +1,4 @@
-# pylint: disable=R0914,R0915,W0127
+# pylint: disable=R0914,R0915,W0127, R0912
 
 from datetime import date, datetime
 
@@ -16,7 +16,7 @@ from solarpark.persistence.models.dividends import Dividend
 from solarpark.persistence.models.economics import Economics
 from solarpark.persistence.models.payments import Payment
 from solarpark.persistence.models.shares import Share
-from solarpark.persistence.shares import get_shares_by_member_and_purchase_year
+from solarpark.persistence.shares import get_shares_by_member, get_shares_by_member_and_purchase_year
 from solarpark.settings import settings
 
 
@@ -40,7 +40,10 @@ def make_dividend(
             continue
 
         for member in members_economics["data"]:
-            shares = get_shares_by_member_and_purchase_year(db, member.member_id, payment_year)
+            if is_historical_fulfillment:
+                shares = get_shares_by_member_and_purchase_year(db, member.member_id, payment_year)
+            else:
+                shares = get_shares_by_member(db, member.member_id)
 
             if not shares["total"] or not shares["data"]:
                 error_request = ErrorLogCreateRequest(
@@ -106,7 +109,6 @@ def make_dividend(
 
             # Should we reinvest and create new shares or not
             nr_reinvest_shares = int(member.account_balance // settings.SHARE_PRICE)
-            nr_of_shares = nr_of_shares + nr_reinvest_shares
             total_investment = total_investment + nr_reinvest_shares * settings.SHARE_PRICE
             current_value = current_value + nr_reinvest_shares * settings.SHARE_PRICE
             account_balance = account_balance - nr_reinvest_shares * settings.SHARE_PRICE
@@ -114,6 +116,7 @@ def make_dividend(
             reinvested = reinvested + nr_reinvest_shares * settings.SHARE_PRICE
 
             if not is_historical_fulfillment and nr_reinvest_shares > 0:
+                nr_of_shares = nr_of_shares + nr_reinvest_shares
                 for _ in range(nr_reinvest_shares):
                     share = Share(
                         member_id=member.member_id,
@@ -164,8 +167,9 @@ def make_dividend(
                 )
                 create_error(db_error, error_request)
 
-        dividend_update = DividendUpdateRequest(dividend_per_share=amount, payment_year=payment_year, completed=True)
-        db.query(Dividend).filter(Dividend.payment_year == payment_year).update(dividend_update.model_dump())
+    dividend_update = DividendUpdateRequest(dividend_per_share=amount, payment_year=payment_year, completed=True)
+    db.query(Dividend).filter(Dividend.payment_year == payment_year).update(dividend_update.model_dump())
+    db.commit()
 
     db_error.close()
     get_logger().info(f"fulfilled dividend {payment_year} successfully")

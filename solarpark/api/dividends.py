@@ -117,7 +117,7 @@ async def delete_dividend_endpoint(dividend_id: int, db: Session = Depends(get_d
     return {"detail": "no dividend deleted"}
 
 
-@router.put("/dividends/fulfill/{payment_year}", summary="Carry out dividend")
+@router.put("/dividends/fulfill/{payment_year}", summary="Carry out dividend", status_code=202)
 async def make_dividend_endpoint(
     payment_year: int,
     is_historical_fulfillment: Optional[bool] = False,
