@@ -86,7 +86,7 @@ def delete_payment(db: Session, payment_id: int):
 
 
 def get_year_payments(db: Session):
-    return int(
+    return (
         db.query(func.sum(Payment.amount))
         .filter(Payment.year == datetime.now().year)
         .filter(Payment.paid_out != True)  # noqa: E712

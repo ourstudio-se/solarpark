@@ -90,8 +90,8 @@ def delete_economics_by_member(db: Session, member_id: int) -> bool:
 
 
 def get_total_disbursed(db: Session):
-    return int(db.query(func.sum(Economics.disbursed)).scalar())
+    return db.query(func.sum(Economics.disbursed)).scalar()
 
 
 def get_total_account_balance(db: Session):
-    return int(db.query(func.sum(Economics.account_balance)).scalar())
+    return db.query(func.sum(Economics.account_balance)).scalar()

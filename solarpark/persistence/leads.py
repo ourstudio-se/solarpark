@@ -40,6 +40,10 @@ def get_lead_by_list_ids(db: Session, lead_ids: list):
     return {"data": result, "total": len(result)}
 
 
+def count_all_leads(db: Session):
+    return db.query(Lead).count()
+
+
 def get_all_leads(db: Session, sort: List, range: List) -> Dict:
     total_count = db.query(Lead).count()
 
