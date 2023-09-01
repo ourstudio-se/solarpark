@@ -75,7 +75,7 @@ def make_dividend(
             nr_of_shares = shares["total"]
             total_investment = sum(share.initial_value for share in shares["data"])
             current_value = sum(share.current_value for share in shares["data"])
-            dividend = amount * nr_of_shares
+            dividend = amount * sum(1 for share in shares["data"] if share.purchased_at.year < payment_year)
 
             account_balance = dividend + member.account_balance
             disbursed = member.disbursed
