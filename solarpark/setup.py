@@ -55,13 +55,13 @@ def add_routes(app) -> None:
         dependencies=[Depends(get_logger)],
     )
     app.include_router(
-        members.router,
-        tags=["members"],
+        leads.router,
+        tags=["leads"],
         dependencies=[Depends(get_logger), Depends(api_security)],
     )
     app.include_router(
-        leads.router,
-        tags=["leads"],
+        members.router,
+        tags=["members"],
         dependencies=[Depends(get_logger), Depends(api_security)],
     )
     app.include_router(
