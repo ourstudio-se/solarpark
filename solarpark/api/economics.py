@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from solarpark.api import parse_integrity_error_msg
-from solarpark.models.economics import Economics, EconomicsCreateRequest, EconomicsOne, EconomicsUpdateRequest
+from solarpark.models.economics import Economics, EconomicsCreateRequest, EconomicsUpdateRequest, SingleEconomics
 from solarpark.persistence.database import get_db
 from solarpark.persistence.economics import (
     create_economics,
@@ -25,7 +25,7 @@ router = APIRouter()
 async def create_economics_endpoint(
     economics_request: EconomicsCreateRequest,
     db: Session = Depends(get_db),
-) -> EconomicsOne:
+) -> SingleEconomics:
     try:
         economics = create_economics(db, economics_request)
         return {"data": economics}
@@ -44,7 +44,7 @@ async def create_economics_endpoint(
 
 
 @router.get("/economics/{economics_id}", summary="Get member economics")
-async def get_economics_endpoint(economics_id: int, db: Session = Depends(get_db)) -> EconomicsOne:
+async def get_economics_endpoint(economics_id: int, db: Session = Depends(get_db)) -> SingleEconomics:
     members_economics = get_economics(db, economics_id)
 
     if len(members_economics["data"]) != 1:
@@ -58,7 +58,7 @@ async def update_economics_endpoint(
     economics_id: int,
     economics_request: EconomicsUpdateRequest,
     db: Session = Depends(get_db),
-) -> EconomicsOne:
+) -> SingleEconomics:
     try:
         updated_economics = update_economics(db, economics_id, economics_request)
         return {"data": updated_economics}
@@ -108,7 +108,7 @@ async def get_all_economics_endpoint(
 
 
 @router.delete("/economics/{economics_id}", summary="Delete economics")
-async def delete_member_endpoint(economics_id: int, db: Session = Depends(get_db)) -> EconomicsOne:
+async def delete_member_endpoint(economics_id: int, db: Session = Depends(get_db)) -> SingleEconomics:
     economics_deleted = delete_economics(db, economics_id)
     if economics_deleted:
         return {"data": economics_deleted}

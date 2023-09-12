@@ -24,7 +24,7 @@ class Lead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class LeadOne(BaseModel):
+class SingleLead(BaseModel):
     data: Lead
 
     model_config = ConfigDict(from_attributes=True)

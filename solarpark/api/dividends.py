@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from solarpark.api import parse_integrity_error_msg
-from solarpark.models.dividends import DividendCreateRequest, DividendOne, Dividends, DividendUpdateRequest
+from solarpark.models.dividends import DividendCreateRequest, Dividends, DividendUpdateRequest, SingleDividend
 from solarpark.persistence import make_dividend
 from solarpark.persistence.database import get_db
 from solarpark.persistence.dividends import (
@@ -28,7 +28,7 @@ router = APIRouter()
 async def create_dividend_endpoint(
     dividend_request: DividendCreateRequest,
     db: Session = Depends(get_db),
-) -> DividendOne:
+) -> SingleDividend:
     try:
         dividend = create_dividend(db, dividend_request)
         return {"data": dividend}
@@ -47,7 +47,7 @@ async def create_dividend_endpoint(
 
 
 @router.get("/dividends/{dividend_id}", summary="Get dividend")
-async def getOne_dividend_endpoint(dividend_id: int, db: Session = Depends(get_db)) -> DividendOne:
+async def get_dividend_endpoint(dividend_id: int, db: Session = Depends(get_db)) -> SingleDividend:
     dividends = get_dividend_by_id(db, dividend_id)
 
     if len(dividends["data"]) != 1:
@@ -92,7 +92,7 @@ async def update_dividend_endpoint(
     dividend_id: int,
     dividend_request: DividendUpdateRequest,
     db: Session = Depends(get_db),
-) -> DividendOne:
+) -> SingleDividend:
     try:
         updated_dividend = update_dividend(db, dividend_id, dividend_request)
         return {"data": updated_dividend}
@@ -111,7 +111,7 @@ async def update_dividend_endpoint(
 
 
 @router.delete("/dividends/{dividend_id}", summary="Delete dividend")
-async def delete_dividend_endpoint(dividend_id: int, db: Session = Depends(get_db)) -> DividendOne:
+async def delete_dividend_endpoint(dividend_id: int, db: Session = Depends(get_db)) -> SingleDividend:
     dividend_deleted = delete_dividend(db, dividend_id)
 
     if dividend_deleted:

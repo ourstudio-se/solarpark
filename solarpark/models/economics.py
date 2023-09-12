@@ -17,7 +17,7 @@ class EconomicsMember(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class EconomicsOne(BaseModel):
+class SingleEconomics(BaseModel):
     data: EconomicsMember
 
     model_config = ConfigDict(from_attributes=True)

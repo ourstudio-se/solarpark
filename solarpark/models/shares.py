@@ -18,7 +18,7 @@ class Share(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class ShareOne(BaseModel):
+class SingleShare(BaseModel):
     data: Share
 
     model_config = ConfigDict(from_attributes=True)

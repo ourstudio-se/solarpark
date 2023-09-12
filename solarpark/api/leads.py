@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from solarpark.api import parse_integrity_error_msg
-from solarpark.models.leads import LeadCreateRequest, LeadOne, Leads, LeadUpdateRequest
+from solarpark.models.leads import LeadCreateRequest, Leads, LeadUpdateRequest, SingleLead
 from solarpark.persistence.database import get_db
 from solarpark.persistence.leads import (
     approve_lead,
@@ -24,7 +24,7 @@ router = APIRouter()
 
 
 @router.get("/leads/{lead_id}", summary="Get lead")
-async def get_lead_endpoint(lead_id: int, db: Session = Depends(get_db)) -> LeadOne:
+async def get_lead_endpoint(lead_id: int, db: Session = Depends(get_db)) -> SingleLead:
     leads = get_lead(db, lead_id)
 
     if len(leads["data"]) != 1:
@@ -64,7 +64,9 @@ async def get_leads_endpoint(
 
 
 @router.put("/leads/{lead_id}", summary="Update lead")
-async def update_lead_endpoint(lead_id: int, lead_request: LeadUpdateRequest, db: Session = Depends(get_db)) -> LeadOne:
+async def update_lead_endpoint(
+    lead_id: int, lead_request: LeadUpdateRequest, db: Session = Depends(get_db)
+) -> SingleLead:
     try:
 
         updated_lead = update_lead(db, lead_id, lead_request)
@@ -84,7 +86,7 @@ async def update_lead_endpoint(lead_id: int, lead_request: LeadUpdateRequest, db
 
 
 @router.post("/leads", summary="Create lead")
-async def create_lead_endpoint(lead_request: LeadCreateRequest, db: Session = Depends(get_db)) -> LeadOne:
+async def create_lead_endpoint(lead_request: LeadCreateRequest, db: Session = Depends(get_db)) -> SingleLead:
     try:
         lead = create_lead(db, lead_request)
         return {"data": lead}
@@ -103,7 +105,7 @@ async def create_lead_endpoint(lead_request: LeadCreateRequest, db: Session = De
 
 
 @router.delete("/leads/{lead_id}", summary="Delete lead")
-async def delete_lead_endpoint(lead_id: int, db: Session = Depends(get_db)) -> LeadOne:
+async def delete_lead_endpoint(lead_id: int, db: Session = Depends(get_db)) -> SingleLead:
     lead_deleted = delete_lead(db, lead_id)
 
     if lead_deleted:

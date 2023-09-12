@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from solarpark.api import parse_integrity_error_msg
-from solarpark.models.shares import ShareCreateRequest, ShareOne, Shares, ShareUpdateRequest
+from solarpark.models.shares import ShareCreateRequest, Shares, ShareUpdateRequest, SingleShare
 from solarpark.persistence.database import get_db
 from solarpark.persistence.shares import (
     create_share,
@@ -23,7 +23,7 @@ router = APIRouter()
 
 
 @router.get("/shares/{share_id}", summary="Get specific share")
-async def get_share_endpoint(share_id: int, db: Session = Depends(get_db)) -> ShareOne:
+async def get_share_endpoint(share_id: int, db: Session = Depends(get_db)) -> SingleShare:
     share = get_share(db, share_id)
 
     if len(share["data"]) != 1:
@@ -65,7 +65,7 @@ async def get_shares_endpoint(
 
 
 @router.post("/shares", summary="Create share")
-async def create_share_endpoint(share_request: ShareCreateRequest, db: Session = Depends(get_db)) -> ShareOne:
+async def create_share_endpoint(share_request: ShareCreateRequest, db: Session = Depends(get_db)) -> SingleShare:
     try:
         share = create_share(db, share_request)
         return {"data": share}
@@ -86,7 +86,7 @@ async def create_share_endpoint(share_request: ShareCreateRequest, db: Session =
 @router.put("/shares/{share_id}", summary="Update share")
 async def update_member_endpoint(
     share_id: int, share_request: ShareUpdateRequest, db: Session = Depends(get_db)
-) -> ShareOne:
+) -> SingleShare:
     try:
         updated_share = update_share(db, share_id, share_request)
         return {"data": updated_share}
@@ -105,7 +105,7 @@ async def update_member_endpoint(
 
 
 @router.delete("/shares/{share_id}", summary="Delete share")
-async def delete_share_endpoint(share_id: int, db: Session = Depends(get_db)) -> ShareOne:
+async def delete_share_endpoint(share_id: int, db: Session = Depends(get_db)) -> SingleShare:
     share_deleted = delete_share(db, share_id)
 
     if share_deleted:

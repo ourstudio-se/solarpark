@@ -13,7 +13,7 @@ class Payment(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class PaymentOne(BaseModel):
+class SinglePayment(BaseModel):
     data: Payment
 
     model_config = ConfigDict(from_attributes=True)

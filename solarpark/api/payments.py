@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from solarpark.api import parse_integrity_error_msg
-from solarpark.models.payments import PaymentCreateRequest, PaymentOne, Payments, PaymentUpdateRequest
+from solarpark.models.payments import PaymentCreateRequest, Payments, PaymentUpdateRequest, SinglePayment
 from solarpark.persistence.database import get_db
 from solarpark.persistence.payments import (
     create_payment,
@@ -26,7 +26,7 @@ router = APIRouter()
 async def create_payment_endpoint(
     payment_request: PaymentCreateRequest,
     db: Session = Depends(get_db),
-) -> PaymentOne:
+) -> SinglePayment:
     try:
 
         payment = create_payment(db, payment_request)
@@ -46,7 +46,7 @@ async def create_payment_endpoint(
 
 
 @router.get("/payments/{payment_id}", summary="Get payment with id")
-async def get_payment_endpoint(payment_id: int, db: Session = Depends(get_db)) -> PaymentOne:
+async def get_payment_endpoint(payment_id: int, db: Session = Depends(get_db)) -> SinglePayment:
     payments = get_payment_id(db, payment_id)
 
     if len(payments["data"]) != 1:
@@ -91,7 +91,7 @@ async def update_payment_endpoint(
     payment_id: int,
     payment_request: PaymentUpdateRequest,
     db: Session = Depends(get_db),
-) -> PaymentOne:
+) -> SinglePayment:
     try:
         updated_payment = update_payment_id(db, payment_id, payment_request)
         return {"data": updated_payment}

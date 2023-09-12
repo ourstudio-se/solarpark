@@ -16,7 +16,7 @@ class ErrorLog(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class ErrorLogOne(BaseModel):
+class SingleErrorLog(BaseModel):
     data: ErrorLog
 
     model_config = ConfigDict(from_attributes=True)

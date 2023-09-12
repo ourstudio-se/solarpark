@@ -32,7 +32,7 @@ class MemberWithShares(Member):
     model_config = ConfigDict(from_attributes=True)
 
 
-class MemberOne(BaseModel):
+class SingleMember(BaseModel):
     data: Member
 
     model_config = ConfigDict(from_attributes=True)

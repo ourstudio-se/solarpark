@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from solarpark.api import parse_integrity_error_msg
-from solarpark.models.members import MemberCreateRequest, MemberOne, Members, MemberUpdateRequest
+from solarpark.models.members import MemberCreateRequest, Members, MemberUpdateRequest, SingleMember
 from solarpark.persistence import delete_all_member_data
 from solarpark.persistence.database import get_db
 from solarpark.persistence.members import (
@@ -23,7 +23,7 @@ router = APIRouter()
 
 
 @router.get("/members/{member_id}", summary="Get member")
-async def get_member_endpoint(member_id: int, db: Session = Depends(get_db)):  # MemberWithShares
+async def get_member_endpoint(member_id: int, db: Session = Depends(get_db)) -> SingleMember:
     members = get_member(db, member_id)
 
     if len(members["data"]) != 1:
@@ -71,7 +71,7 @@ async def get_members_endpoint(
 @router.put("/members/{member_id}", summary="Update member")
 async def update_member_endpoint(
     member_id: int, member_request: MemberUpdateRequest, db: Session = Depends(get_db)
-) -> MemberOne:
+) -> SingleMember:
     try:
         updated_member = update_member(db, member_id, member_request)
         return {"data": updated_member}
@@ -90,7 +90,7 @@ async def update_member_endpoint(
 
 
 @router.post("/members", summary="Create member")
-async def create_member_endpoint(member_request: MemberCreateRequest, db: Session = Depends(get_db)) -> MemberOne:
+async def create_member_endpoint(member_request: MemberCreateRequest, db: Session = Depends(get_db)) -> SingleMember:
     try:
         member = create_member(db, member_request)
         return {"data": member}
@@ -109,7 +109,7 @@ async def create_member_endpoint(member_request: MemberCreateRequest, db: Sessio
 
 
 @router.delete("/members/{member_id}", summary="Delete member")
-async def delete_member_endpoint(member_id: int, db: Session = Depends(get_db)) -> MemberOne:
+async def delete_member_endpoint(member_id: int, db: Session = Depends(get_db)) -> SingleMember:
 
     member_deleted = delete_all_member_data(db, member_id)
 
