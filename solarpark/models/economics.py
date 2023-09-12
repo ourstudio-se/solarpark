@@ -17,6 +17,12 @@ class EconomicsMember(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class EconomicsOne(BaseModel):
+    data: EconomicsMember
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class Economics(BaseModel):
     data: List[EconomicsMember]
     total: int

@@ -7,36 +7,29 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from solarpark.api import parse_integrity_error_msg
-from solarpark.models.members import Member, MemberCreateRequest, Members, MemberUpdateRequest, MemberWithShares
+from solarpark.models.members import MemberCreateRequest, MemberOne, Members, MemberUpdateRequest
+from solarpark.persistence import delete_all_member_data
 from solarpark.persistence.database import get_db
-from solarpark.persistence.economics import delete_economics_by_member
 from solarpark.persistence.members import (
     create_member,
-    delete_member,
     find_member,
     get_all_members,
     get_member,
     get_member_by_list_ids,
     update_member,
 )
-from solarpark.persistence.shares import delete_shares_by_member, get_shares_by_member
 
 router = APIRouter()
 
 
 @router.get("/members/{member_id}", summary="Get member")
-async def get_member_endpoint(member_id: int, db: Session = Depends(get_db)) -> MemberWithShares:
+async def get_member_endpoint(member_id: int, db: Session = Depends(get_db)):  # MemberWithShares
     members = get_member(db, member_id)
-    shares = get_shares_by_member(db, member_id)
 
     if len(members["data"]) != 1:
         raise HTTPException(status_code=404, detail="member not found")
 
-    member = members["data"][0]
-    if shares:
-        member.shares = shares["data"]
-
-    return member
+    return {"data": members["data"][0]}
 
 
 @router.get("/members/search/{term}", summary="Search for member")
@@ -78,9 +71,10 @@ async def get_members_endpoint(
 @router.put("/members/{member_id}", summary="Update member")
 async def update_member_endpoint(
     member_id: int, member_request: MemberUpdateRequest, db: Session = Depends(get_db)
-) -> Member:
+) -> MemberOne:
     try:
-        return update_member(db, member_id, member_request)
+        updated_member = update_member(db, member_id, member_request)
+        return {"data": updated_member}
     except IntegrityError as ex:
         if "UniqueViolation" in str(ex):
             raise HTTPException(
@@ -96,9 +90,10 @@ async def update_member_endpoint(
 
 
 @router.post("/members", summary="Create member")
-async def create_member_endpoint(member_request: MemberCreateRequest, db: Session = Depends(get_db)) -> Member:
+async def create_member_endpoint(member_request: MemberCreateRequest, db: Session = Depends(get_db)) -> MemberOne:
     try:
-        return create_member(db, member_request)
+        member = create_member(db, member_request)
+        return {"data": member}
     except IntegrityError as ex:
         if "UniqueViolation" in str(ex):
             raise HTTPException(
@@ -114,17 +109,11 @@ async def create_member_endpoint(member_request: MemberCreateRequest, db: Sessio
 
 
 @router.delete("/members/{member_id}", summary="Delete member")
-async def delete_member_endpoint(member_id: int, db: Session = Depends(get_db)):
-    shares_deleted = delete_shares_by_member(db, member_id)
-    economics_deleted = delete_economics_by_member(db, member_id)
-    member_deleted = delete_member(db, member_id)
+async def delete_member_endpoint(member_id: int, db: Session = Depends(get_db)) -> MemberOne:
 
-    if member_deleted and shares_deleted and economics_deleted:
-        return {"detail": "member, shares and economics deleted successfully"}
-    if member_deleted and shares_deleted:
-        return {"detail": " only member and shares deleted successfully"}
-    if shares_deleted:
-        return {"detail": "only shares deleted successfully"}
+    member_deleted = delete_all_member_data(db, member_id)
+
     if member_deleted:
-        return {"detail": "member deleted successfully"}
-    return {"detail": "no member nor shares deleted"}
+        return {"data": member_deleted}
+
+    raise HTTPException(status_code=400, detail="member not deleted")

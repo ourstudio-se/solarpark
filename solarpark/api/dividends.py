@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from solarpark.api import parse_integrity_error_msg
-from solarpark.models.dividends import Dividend, DividendCreateRequest, Dividends, DividendUpdateRequest
+from solarpark.models.dividends import DividendCreateRequest, DividendOne, Dividends, DividendUpdateRequest
 from solarpark.persistence import make_dividend
 from solarpark.persistence.database import get_db
 from solarpark.persistence.dividends import (
@@ -28,9 +28,10 @@ router = APIRouter()
 async def create_dividend_endpoint(
     dividend_request: DividendCreateRequest,
     db: Session = Depends(get_db),
-) -> Dividend:
+) -> DividendOne:
     try:
-        return create_dividend(db, dividend_request)
+        dividend = create_dividend(db, dividend_request)
+        return {"data": dividend}
     except IntegrityError as ex:
         if "UniqueViolation" in str(ex):
             raise HTTPException(
@@ -46,19 +47,17 @@ async def create_dividend_endpoint(
 
 
 @router.get("/dividends/{dividend_id}", summary="Get dividend")
-async def get_dividend_endpoint(dividend_id: int, db: Session = Depends(get_db)) -> Dividend:
+async def getOne_dividend_endpoint(dividend_id: int, db: Session = Depends(get_db)) -> DividendOne:
     dividends = get_dividend_by_id(db, dividend_id)
 
     if len(dividends["data"]) != 1:
         raise HTTPException(status_code=404, detail="dividend not found")
 
-    dividend = dividends["data"][0]
-
-    return dividend
+    return {"data": dividends["data"][0]}
 
 
 @router.get("/dividends", summary="Get all dividens")
-async def get_dividends_endpoint(
+async def getList_dividends_endpoint(
     range: str | None = None,
     sort: str | None = None,
     filter: str | None = None,
@@ -80,6 +79,8 @@ async def get_dividends_endpoint(
             if isinstance(filter_obj["id"], list):
                 return get_dividend_by_list_ids(db, filter_obj["id"])
             return get_dividend_by_id(db, filter_obj["id"])
+        if filter_obj and "year" in filter_obj:
+            return get_dividend_by_year(db, filter_obj["year"])
 
         return get_all_dividends(db, sort=sort_obj, range=range_obj)
     except json.JSONDecodeError as ex:
@@ -91,9 +92,10 @@ async def update_dividend_endpoint(
     dividend_id: int,
     dividend_request: DividendUpdateRequest,
     db: Session = Depends(get_db),
-) -> Dividend:
+) -> DividendOne:
     try:
-        return update_dividend(db, dividend_id, dividend_request)
+        updated_dividend = update_dividend(db, dividend_id, dividend_request)
+        return {"data": updated_dividend}
     except IntegrityError as ex:
         if "UniqueViolation" in str(ex):
             raise HTTPException(
@@ -109,12 +111,12 @@ async def update_dividend_endpoint(
 
 
 @router.delete("/dividends/{dividend_id}", summary="Delete dividend")
-async def delete_dividend_endpoint(dividend_id: int, db: Session = Depends(get_db)):
+async def delete_dividend_endpoint(dividend_id: int, db: Session = Depends(get_db)) -> DividendOne:
     dividend_deleted = delete_dividend(db, dividend_id)
 
     if dividend_deleted:
-        return {"detail": "dividend deleted successfully"}
-    return {"detail": "no dividend deleted"}
+        return {"data": dividend_deleted}
+    raise HTTPException(status_code=400, detail="error deleting dividend")
 
 
 @router.put("/dividends/fulfill/{payment_year}", summary="Carry out dividend", status_code=202)

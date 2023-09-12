@@ -18,6 +18,12 @@ class Share(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ShareOne(BaseModel):
+    data: Share
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class ShareResponse(BaseModel):
     data: List[Share]
     total: int

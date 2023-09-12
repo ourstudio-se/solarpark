@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from solarpark.api import parse_integrity_error_msg
-from solarpark.models.error_log import ErrorLog, ErrorLogCreateRequest, ErrorLogs, ErrorLogUpdateRequest
+from solarpark.models.error_log import ErrorLog, ErrorLogCreateRequest, ErrorLogOne, ErrorLogs, ErrorLogUpdateRequest
 from solarpark.persistence.database import get_db
 from solarpark.persistence.error_log import (
     create_error,
@@ -22,15 +22,13 @@ router = APIRouter()
 
 
 @router.get("/errors/{error_id}", summary="Get error")
-async def get_error_endpoint(error_id: int, db: Session = Depends(get_db)) -> ErrorLog:
+async def get_error_endpoint(error_id: int, db: Session = Depends(get_db)) -> ErrorLogOne:
     errors = get_error(db, error_id)
 
     if len(errors["data"]) != 1:
         raise HTTPException(status_code=404, detail="error not found")
 
-    error = errors["data"][0]
-
-    return error
+    return {"data": errors["data"][0]}
 
 
 @router.get("/errors", summary="Get all errors")
@@ -65,9 +63,10 @@ async def get_errors_endpoint(
 @router.put("/errors/{error_id}", summary="Update error")
 async def update_error_endpoint(
     error_id: int, error_request: ErrorLogUpdateRequest, db: Session = Depends(get_db)
-) -> ErrorLog:
+) -> ErrorLogOne:
     try:
-        return update_error(db, error_id, error_request)
+        updated_errorLog = update_error(db, error_id, error_request)
+        return {"data": updated_errorLog}
     except IntegrityError as ex:
         if "UniqueViolation" in str(ex):
             raise HTTPException(
@@ -104,7 +103,6 @@ async def create_error_endpoint(error_request: ErrorLogCreateRequest, db: Sessio
 async def delete_error_endpoint(error_id: int, db: Session = Depends(get_db)):
     error_deleted = delete_error(db, error_id)
 
-    if not error_deleted:
-        raise HTTPException(status_code=400, detail="error deleting error")
-
-    return {"detail": "error deleted"}
+    if error_deleted:
+        return {"data": error_deleted}
+    raise HTTPException(status_code=400, detail="error deleting dividend")

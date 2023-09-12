@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from solarpark.api import parse_integrity_error_msg
-from solarpark.models.leads import Lead, LeadCreateRequest, Leads, LeadUpdateRequest
+from solarpark.models.leads import LeadCreateRequest, LeadOne, Leads, LeadUpdateRequest
 from solarpark.persistence.database import get_db
 from solarpark.persistence.leads import (
     approve_lead,
@@ -24,15 +24,13 @@ router = APIRouter()
 
 
 @router.get("/leads/{lead_id}", summary="Get lead")
-async def get_lead_endpoint(lead_id: int, db: Session = Depends(get_db)) -> Lead:
+async def get_lead_endpoint(lead_id: int, db: Session = Depends(get_db)) -> LeadOne:
     leads = get_lead(db, lead_id)
 
     if len(leads["data"]) != 1:
         raise HTTPException(status_code=404, detail="member not found")
 
-    lead = leads["data"][0]
-
-    return lead
+    return {"data": leads["data"][0]}
 
 
 @router.get("/leads", summary="Get all leads")
@@ -66,9 +64,11 @@ async def get_leads_endpoint(
 
 
 @router.put("/leads/{lead_id}", summary="Update lead")
-async def update_lead_endpoint(lead_id: int, lead_request: LeadUpdateRequest, db: Session = Depends(get_db)) -> Lead:
+async def update_lead_endpoint(lead_id: int, lead_request: LeadUpdateRequest, db: Session = Depends(get_db)) -> LeadOne:
     try:
-        return update_lead(db, lead_id, lead_request)
+
+        updated_lead = update_lead(db, lead_id, lead_request)
+        return {"data": updated_lead}
     except IntegrityError as ex:
         if "UniqueViolation" in str(ex):
             raise HTTPException(
@@ -84,9 +84,10 @@ async def update_lead_endpoint(lead_id: int, lead_request: LeadUpdateRequest, db
 
 
 @router.post("/leads", summary="Create lead")
-async def create_lead_endpoint(lead_request: LeadCreateRequest, db: Session = Depends(get_db)) -> Lead:
+async def create_lead_endpoint(lead_request: LeadCreateRequest, db: Session = Depends(get_db)) -> LeadOne:
     try:
-        return create_lead(db, lead_request)
+        lead = create_lead(db, lead_request)
+        return {"data": lead}
     except IntegrityError as ex:
         if "UniqueViolation" in str(ex):
             raise HTTPException(
@@ -102,13 +103,12 @@ async def create_lead_endpoint(lead_request: LeadCreateRequest, db: Session = De
 
 
 @router.delete("/leads/{lead_id}", summary="Delete lead")
-async def delete_lead_endpoint(lead_id: int, db: Session = Depends(get_db)):
+async def delete_lead_endpoint(lead_id: int, db: Session = Depends(get_db)) -> LeadOne:
     lead_deleted = delete_lead(db, lead_id)
 
     if lead_deleted:
-        return {"detail": "lead deleted successfully"}
-
-    return {"detail": "lead not deleted"}
+        return {"data": lead_deleted}
+    raise HTTPException(status_code=400, detail="error deleting lead")
 
 
 @router.post("/leads/{lead_id}", summary="Approve leads")

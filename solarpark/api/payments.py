@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from solarpark.api import parse_integrity_error_msg
-from solarpark.models.payments import Payment, PaymentCreateRequest, Payments, PaymentUpdateRequest
+from solarpark.models.payments import PaymentCreateRequest, PaymentOne, Payments, PaymentUpdateRequest
 from solarpark.persistence.database import get_db
 from solarpark.persistence.payments import (
     create_payment,
@@ -26,9 +26,11 @@ router = APIRouter()
 async def create_payment_endpoint(
     payment_request: PaymentCreateRequest,
     db: Session = Depends(get_db),
-) -> Payment:
+) -> PaymentOne:
     try:
-        return create_payment(db, payment_request)
+
+        payment = create_payment(db, payment_request)
+        return {"data": payment}
     except IntegrityError as ex:
         if "UniqueViolation" in str(ex):
             raise HTTPException(
@@ -44,15 +46,13 @@ async def create_payment_endpoint(
 
 
 @router.get("/payments/{payment_id}", summary="Get payment with id")
-async def get_payment_endpoint(payment_id: int, db: Session = Depends(get_db)) -> Payment:
+async def get_payment_endpoint(payment_id: int, db: Session = Depends(get_db)) -> PaymentOne:
     payments = get_payment_id(db, payment_id)
 
     if len(payments["data"]) != 1:
         raise HTTPException(status_code=404, detail="payment not found")
 
-    payment = payments["data"][0]
-
-    return payment
+    return {"data": payments["data"][0]}
 
 
 @router.get("/payments", summary="Get all payments")
@@ -91,9 +91,10 @@ async def update_payment_endpoint(
     payment_id: int,
     payment_request: PaymentUpdateRequest,
     db: Session = Depends(get_db),
-) -> Payment:
+) -> PaymentOne:
     try:
-        return update_payment_id(db, payment_id, payment_request)
+        updated_payment = update_payment_id(db, payment_id, payment_request)
+        return {"data": updated_payment}
     except IntegrityError as ex:
         if "UniqueViolation" in str(ex):
             raise HTTPException(
@@ -113,6 +114,6 @@ async def delete_payment_endpoint(payment_id: int, db: Session = Depends(get_db)
     lead_deleted = delete_payment(db, payment_id)
 
     if lead_deleted:
-        return {"detail": "payment deleted successfully"}
+        return {"data": lead_deleted}
 
-    return {"detail": "payment not deleted"}
+    raise HTTPException(status_code=400, detail="error deleting payment")

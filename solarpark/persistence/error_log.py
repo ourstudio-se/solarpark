@@ -50,11 +50,12 @@ def update_error(db: Session, error_id: int, error_update: ErrorLogUpdateRequest
     return db.query(ErrorLog).filter(ErrorLog.id == error_id).first()
 
 
-def delete_error(db: Session, error_id: int) -> bool:
+def delete_error(db: Session, error_id: int):
+    errorlog = db.query(ErrorLog).filter(ErrorLog.id == error_id).first()
     deleted = db.query(ErrorLog).filter(ErrorLog.id == error_id).delete()
     if deleted == 1:
         db.commit()
-        return True
+        return errorlog
     return False
 
 

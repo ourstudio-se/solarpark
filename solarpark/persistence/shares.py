@@ -156,7 +156,7 @@ def update_share(db: Session, share_id: int, share_update: ShareUpdateRequest):
     return db.query(Share).filter(Share.id == share_id).first()
 
 
-def delete_share(db: Session, share_id: int) -> bool:
+def delete_share(db: Session, share_id: int):
     share = get_share(db, share_id)
     if share and share["data"]:
         member_id = share["data"][0].member_id
@@ -186,7 +186,7 @@ def delete_share(db: Session, share_id: int) -> bool:
 
     try:
         db.commit()
-        return True
+        return share["data"][0]
     except Exception as ex:
         db.rollback()
         error_request = ErrorLogCreateRequest(
@@ -196,5 +196,4 @@ def delete_share(db: Session, share_id: int) -> bool:
             resolved=False,
         )
         create_error(db, error_request)
-
         return False

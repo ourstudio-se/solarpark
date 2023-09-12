@@ -72,14 +72,16 @@ def get_all_leads(db: Session, sort: List, range: List) -> Dict:
 
 
 def delete_lead(db: Session, lead_id):
+    lead = db.query(Lead).filter(Lead.id == lead_id).first()
     deleted = db.query(Lead).filter(Lead.id == lead_id).delete()
     if deleted == 1:
         db.commit()
-        return True
+        return lead
     return False
 
 
 def create_lead(db: Session, lead_request: LeadCreateRequest):
+
     lead = Lead(
         firstname=lead_request.firstname,
         lastname=lead_request.lastname,
@@ -120,11 +122,13 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
 
     existing_member_id = lead.existing_id
     if existing_member_id:
+
         share_request = ShareCreateRequest(
             comment=comment,
             purchased_at=datetime.now(),
             member_id=existing_member_id,
             initial_value=settings.SHARE_PRICE,
+            from_internal_account=False,
         )
         for _ in range(lead.quantity_shares):
             create_share(db=db, share_request=share_request)
@@ -168,6 +172,7 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
         purchased_at=datetime.now(),
         member_id=new_member_id,
         initial_value=settings.SHARE_PRICE,
+        from_internal_account=False,
     )
     for _ in range(lead.quantity_shares):
         create_share(db=db, share_request=share_request)

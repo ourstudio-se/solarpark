@@ -24,6 +24,12 @@ class Lead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class LeadOne(BaseModel):
+    data: Lead
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class Leads(BaseModel):
     data: List[Lead]
     total: int

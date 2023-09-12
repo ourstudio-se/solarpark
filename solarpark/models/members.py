@@ -32,6 +32,12 @@ class MemberWithShares(Member):
     model_config = ConfigDict(from_attributes=True)
 
 
+class MemberOne(BaseModel):
+    data: Member
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class MemberCreateRequest(BaseModel):
     bank: Optional[str] = None
     birth_date: Optional[datetime] = None

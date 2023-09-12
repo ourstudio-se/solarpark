@@ -16,6 +16,12 @@ class ErrorLog(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ErrorLogOne(BaseModel):
+    data: ErrorLog
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class ErrorLogCreateRequest(BaseModel):
     member_id: Optional[int] = None
     share_id: Optional[int] = None

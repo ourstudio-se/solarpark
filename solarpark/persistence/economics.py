@@ -73,11 +73,12 @@ def get_all_economics(db: Session, sort: List, range: List) -> Dict:
     }
 
 
-def delete_economics(db: Session, economics_id: int) -> bool:
+def delete_economics(db: Session, economics_id: int):
+    economics = db.query(Economics).filter(Economics.id == economics_id).first()
     deleted = db.query(Economics).filter(Economics.id == economics_id).delete()
     if deleted == 1:
         db.commit()
-        return True
+        return economics
     return False
 
 

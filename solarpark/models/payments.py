@@ -13,6 +13,12 @@ class Payment(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class PaymentOne(BaseModel):
+    data: Payment
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class Payments(BaseModel):
     data: List[Payment]
     total: int

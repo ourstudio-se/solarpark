@@ -14,6 +14,7 @@ from solarpark.persistence.economics import get_all_economics
 from solarpark.persistence.error_log import create_error
 from solarpark.persistence.models.dividends import Dividend
 from solarpark.persistence.models.economics import Economics
+from solarpark.persistence.models.members import Member
 from solarpark.persistence.models.payments import Payment
 from solarpark.persistence.models.shares import Share
 from solarpark.persistence.shares import get_shares_by_member, get_shares_by_member_and_purchase_year
@@ -173,3 +174,28 @@ def make_dividend(
 
     db_error.close()
     get_logger().info(f"fulfilled dividend {payment_year} successfully")
+
+
+def delete_all_member_data(db: Session, member_id: int):
+    engine = create_engine(f"{settings.CONNECTIONSTRING_DB}")
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    db_error = SessionLocal()
+
+    member = db.query(Member).filter(Member.id == member_id).first()
+
+    db.query(Share).filter(Share.member_id == member_id).delete()
+    db.query(Economics).filter(Economics.member_id == member_id).delete()
+    db.query(Member).filter(Member.id == member_id).delete()
+
+    try:
+        db.commit()
+        return member
+    except Exception as ex:
+        db.rollback()
+        error_request = ErrorLogCreateRequest(
+            member_id=member_id,
+            comment=f"Error: no member deleted: {ex}",
+            resolved=False,
+        )
+        create_error(db_error, error_request)
+        return False

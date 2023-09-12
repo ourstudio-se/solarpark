@@ -78,10 +78,11 @@ def get_all_payments(db: Session, sort: List, range: List) -> Dict:
 
 
 def delete_payment(db: Session, payment_id: int):
+    payment = db.query(Payment).filter(Payment.id == payment_id).first()
     deleted = db.query(Payment).filter(Payment.id == payment_id).delete()
     if deleted == 1:
         db.commit()
-        return True
+        return payment
     return False
 
 

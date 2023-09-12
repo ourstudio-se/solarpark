@@ -15,6 +15,12 @@ class Dividend(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class DividendOne(BaseModel):
+    data: Dividend
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class Dividends(BaseModel):
     data: List[Dividend]
     total: int

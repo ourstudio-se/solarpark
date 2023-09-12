@@ -68,9 +68,10 @@ def get_all_dividends(db: Session, sort: List, range: List) -> Dict:
     }
 
 
-def delete_dividend(db: Session, dividend_id: int) -> bool:
+def delete_dividend(db: Session, dividend_id: int):
+    dividend = db.query(Dividend).filter(Dividend.id == dividend_id).first()
     deleted = db.query(Dividend).filter(Dividend.id == dividend_id).delete()
     if deleted == 1:
         db.commit()
-        return True
+        return dividend
     return False

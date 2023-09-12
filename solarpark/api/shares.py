@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from solarpark.api import parse_integrity_error_msg
-from solarpark.models.shares import Share, ShareCreateRequest, Shares, ShareUpdateRequest
+from solarpark.models.shares import ShareCreateRequest, ShareOne, Shares, ShareUpdateRequest
 from solarpark.persistence.database import get_db
 from solarpark.persistence.shares import (
     create_share,
@@ -23,12 +23,12 @@ router = APIRouter()
 
 
 @router.get("/shares/{share_id}", summary="Get specific share")
-async def get_share_endpoint(share_id: int, db: Session = Depends(get_db)) -> Share:
-    share = get_share(db, share_id)["data"][0]
+async def get_share_endpoint(share_id: int, db: Session = Depends(get_db)) -> ShareOne:
+    share = get_share(db, share_id)
 
-    if not share:
+    if len(share["data"]) != 1:
         raise HTTPException(status_code=404, detail="share not found")
-    return share
+    return {"data": share["data"][0]}
 
 
 @router.get("/shares", summary="Get shares")
@@ -65,9 +65,10 @@ async def get_shares_endpoint(
 
 
 @router.post("/shares", summary="Create share")
-async def create_share_endpoint(share_request: ShareCreateRequest, db: Session = Depends(get_db)) -> Share:
+async def create_share_endpoint(share_request: ShareCreateRequest, db: Session = Depends(get_db)) -> ShareOne:
     try:
-        return create_share(db, share_request)
+        share = create_share(db, share_request)
+        return {"data": share}
     except IntegrityError as ex:
         if "UniqueViolation" in str(ex):
             raise HTTPException(
@@ -85,9 +86,10 @@ async def create_share_endpoint(share_request: ShareCreateRequest, db: Session =
 @router.put("/shares/{share_id}", summary="Update share")
 async def update_member_endpoint(
     share_id: int, share_request: ShareUpdateRequest, db: Session = Depends(get_db)
-) -> Share:
+) -> ShareOne:
     try:
-        return update_share(db, share_id, share_request)
+        updated_share = update_share(db, share_id, share_request)
+        return {"data": updated_share}
     except IntegrityError as ex:
         if "UniqueViolation" in str(ex):
             raise HTTPException(
@@ -103,10 +105,10 @@ async def update_member_endpoint(
 
 
 @router.delete("/shares/{share_id}", summary="Delete share")
-async def delete_share_endpoint(share_id: int, db: Session = Depends(get_db)):
-    shares_deleted = delete_share(db, share_id)
+async def delete_share_endpoint(share_id: int, db: Session = Depends(get_db)) -> ShareOne:
+    share_deleted = delete_share(db, share_id)
 
-    if shares_deleted:
-        return {"detail": "share deleted successfully"}
+    if share_deleted:
+        return {"data": share_deleted}
 
-    return {"detail": "no share deleted"}
+    raise HTTPException(status_code=400, detail="error deleting share")
