@@ -164,7 +164,7 @@ async def get_analytics_endpoint(
         errors = []
         for row in dict_reader:
             try:
-                if len(row) == 12:
+                if len(row) == 12 or len(row) == 13:
                     new_share = ShareCreateRequestImport(
                         id=row["Andel nr"],
                         member_id=row["Medlem"],

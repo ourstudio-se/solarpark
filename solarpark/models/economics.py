@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict
@@ -13,6 +14,8 @@ class EconomicsMember(BaseModel):
     account_balance: Optional[float] = 0
     pay_out: bool
     disbursed: Optional[float] = 0
+    last_dividend_year: Optional[int] = None
+    issued_dividend: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -39,6 +42,8 @@ class EconomicsCreateRequest(BaseModel):
     account_balance: Optional[float] = 0
     pay_out: bool
     disbursed: Optional[float] = 0
+    last_dividend_year: Optional[int] = None
+    issued_dividend: Optional[datetime] = None
 
 
 class EconomicsUpdateRequest(BaseModel):
@@ -49,3 +54,5 @@ class EconomicsUpdateRequest(BaseModel):
     account_balance: Optional[float] = 0
     pay_out: Optional[bool]
     disbursed: Optional[float] = 0
+    last_dividend_year: Optional[int] = None
+    issued_dividend: Optional[datetime] = None

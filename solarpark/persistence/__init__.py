@@ -10,7 +10,7 @@ from solarpark.models.dividends import DividendUpdateRequest
 from solarpark.models.economics import EconomicsUpdateRequest
 from solarpark.models.error_log import ErrorLogCreateRequest
 from solarpark.models.shares import ShareUpdateRequest
-from solarpark.persistence.economics import get_all_economics
+from solarpark.persistence.economics import get_all_economics_dividend
 from solarpark.persistence.error_log import create_error
 from solarpark.persistence.models.dividends import Dividend
 from solarpark.persistence.models.economics import Economics
@@ -30,7 +30,7 @@ def make_dividend(
 
     batch_size = settings.ECONOMICS_BACKGROUND_BATCH
     for i in range(0, nr_of_economics, batch_size):
-        members_economics = get_all_economics(db, sort=[], range=[i, batch_size])
+        members_economics = get_all_economics_dividend(db, payment_year, range=[i, batch_size])
 
         if not members_economics or not members_economics["data"]:
             error_request = ErrorLogCreateRequest(
@@ -103,6 +103,8 @@ def make_dividend(
                 account_balance=account_balance,
                 pay_out=member.pay_out,
                 disbursed=disbursed,
+                last_dividend_year=payment_year,
+                issued_dividend=datetime.now(),
             )
 
             db.query(Economics).filter(Economics.id == member.id).update(economics_update.model_dump())
@@ -137,6 +139,8 @@ def make_dividend(
                     account_balance=account_balance,
                     pay_out=member.pay_out,
                     disbursed=disbursed,
+                    last_dividend_year=payment_year,
+                    issued_dividend=datetime.now(),
                 )
 
                 db.query(Economics).filter(Economics.id == member.id).update(economics_update.model_dump())
@@ -152,6 +156,8 @@ def make_dividend(
                     account_balance=account_balance,
                     pay_out=member.pay_out,
                     disbursed=disbursed,
+                    last_dividend_year=payment_year,
+                    issued_dividend=datetime.now(),
                 )
 
                 db.query(Economics).filter(Economics.id == member.id).update(economics_update.model_dump())
