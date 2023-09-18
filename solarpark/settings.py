@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     ISSUER: str = "https://solarpark.eu.auth0.com/"
     ALGORITHMS: str = "RS256"
     SENDGRID_API_KEY: str
+    SENDGRID_EMAIL_FROM: str
     SHARE_PRICE: int = 3000
     ALLOW_ORIGINS: str = "http://localhost:5173;https://solarpark-test-env.netlify.app"
     ECONOMICS_BACKGROUND_BATCH: int = 20
