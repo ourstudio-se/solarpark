@@ -1,6 +1,6 @@
 # pylint: disable=R0914,R0915,W0127, R0912
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -104,7 +104,7 @@ def make_dividend(
                 pay_out=member.pay_out,
                 disbursed=disbursed,
                 last_dividend_year=payment_year,
-                issued_dividend=datetime.now(),
+                issued_dividend=datetime.now(timezone.utc),
             )
 
             db.query(Economics).filter(Economics.id == member.id).update(economics_update.model_dump())
@@ -140,7 +140,7 @@ def make_dividend(
                     pay_out=member.pay_out,
                     disbursed=disbursed,
                     last_dividend_year=payment_year,
-                    issued_dividend=datetime.now(),
+                    issued_dividend=datetime.now(timezone.utc),
                 )
 
                 db.query(Economics).filter(Economics.id == member.id).update(economics_update.model_dump())
@@ -157,7 +157,7 @@ def make_dividend(
                     pay_out=member.pay_out,
                     disbursed=disbursed,
                     last_dividend_year=payment_year,
-                    issued_dividend=datetime.now(),
+                    issued_dividend=datetime.now(timezone.utc),
                 )
 
                 db.query(Economics).filter(Economics.id == member.id).update(economics_update.model_dump())
