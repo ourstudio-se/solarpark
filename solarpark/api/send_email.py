@@ -13,6 +13,7 @@ from solarpark.persistence.members import get_member
 from solarpark.persistence.shares import get_shares_by_member
 from solarpark.services import sendgrid_client
 from solarpark.services.sendgrid import SendGridClient
+from solarpark.settings import settings
 
 router = APIRouter()
 
@@ -56,7 +57,7 @@ def send_certificate_with_sendgrid(
     mail = Email(
         subject="Andelsbevis Solar Park",
         to_emails=["joar@ourstudio.se", "simon@ourstudio.se"],  # Change
-        from_email="joar@ourstudio.se",  # Change
+        from_email=settings.SENDGRID_EMAIL_FROM,
         html_content=html_mail,
         attachments=[
             Attachment(file_content=io.BytesIO(pdf), file_name="andelsbevis.pdf", file_type="application/pdf")
