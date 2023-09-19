@@ -1,10 +1,11 @@
 # pylint: disable=W0511, R0914,  W0622
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from solarpark.api.send_email import send_certificate_with_sendgrid
 from solarpark.models.economics import EconomicsCreateRequest, EconomicsUpdateRequest
 from solarpark.models.leads import LeadCreateRequest, LeadUpdateRequest
 from solarpark.models.members import MemberCreateRequest
@@ -13,6 +14,7 @@ from solarpark.persistence.economics import create_economics, get_economics_by_m
 from solarpark.persistence.members import create_member
 from solarpark.persistence.models.leads import Lead
 from solarpark.persistence.shares import create_share
+from solarpark.services import sendgrid_client
 from solarpark.settings import settings
 
 
@@ -125,7 +127,7 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
 
         share_request = ShareCreateRequest(
             comment=comment,
-            purchased_at=datetime.now(),
+            purchased_at=datetime.now(timezone.utc),
             member_id=existing_member_id,
             initial_value=settings.SHARE_PRICE,
             from_internal_account=False,
@@ -149,6 +151,8 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
         )
 
         update_economics(db, member.id, member_update_request)
+        if lead.generate_certificate:
+            send_certificate_with_sendgrid(sendgrid_client(), db, existing_member_id)
 
         delete_lead(db, lead_id)
         return True
@@ -162,14 +166,14 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
         org_number=lead.org_number,
         street_address=lead.street_address,
         telephone=lead.telephone,
-        year=datetime.now(),
+        year=datetime.now(timezone.utc),
         zip_code=lead.zip_code,
     )
     new_member = create_member(db, member_request)
     new_member_id = new_member.id
     share_request = ShareCreateRequest(
         comment=comment,
-        purchased_at=datetime.now(),
+        purchased_at=datetime.now(timezone.utc),
         member_id=new_member_id,
         initial_value=settings.SHARE_PRICE,
         from_internal_account=False,
@@ -189,6 +193,8 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
     )
 
     create_economics(db, member_create_request)
+    if lead.generate_certificate:
+        send_certificate_with_sendgrid(sendgrid_client(), db, new_member_id)
 
     delete_lead(db, lead_id)
     return True
