@@ -1,4 +1,4 @@
-# pylint: disable=R0914, C0200
+# pylint: disable=R0914, C0200,  W0702
 import re
 from typing import Dict
 
@@ -27,8 +27,10 @@ def commit_email_hook(db: Session, request: Dict):
     first_last_name = re.split(" ", plain_dict["Namn"])
     quantity_shares = re.split(" ", plain_dict["Antal beställda andelar"])[0]
     generate_certificate = "Ja" == plain_dict["Andelsbevis via epost"]
-    existing_id = int(plain_dict["Medlemsnummer"]) if (plain_dict["Medlemsnummer"] != "") else None
-
+    try:
+        existing_id = int(plain_dict["Medlemsnummer"].strip()) if (plain_dict["Medlemsnummer"].strip() != "") else None
+    except:  # noqa E722
+        existing_id = None
     # Handle multiple names
     lastname_stripped = first_last_name.pop()
     firstnames_stripped = first_last_name
