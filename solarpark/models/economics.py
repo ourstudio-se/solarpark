@@ -14,7 +14,7 @@ class EconomicsMember(BaseModel):
     account_balance: Optional[float] = 0
     pay_out: bool
     disbursed: Optional[float] = 0
-    last_dividend_year: Optional[int] = None
+    last_dividend_year: Optional[int] = 0
     issued_dividend: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
@@ -42,7 +42,7 @@ class EconomicsCreateRequest(BaseModel):
     account_balance: Optional[float] = 0
     pay_out: bool
     disbursed: Optional[float] = 0
-    last_dividend_year: Optional[int] = None
+    last_dividend_year: Optional[int] = 0
     issued_dividend: Optional[datetime] = None
 
 
@@ -54,5 +54,5 @@ class EconomicsUpdateRequest(BaseModel):
     account_balance: Optional[float] = 0
     pay_out: Optional[bool]
     disbursed: Optional[float] = 0
-    last_dividend_year: Optional[int] = None
+    last_dividend_year: Optional[int] = 0
     issued_dividend: Optional[datetime] = None

@@ -1,4 +1,4 @@
-# pylint: disable=R0914,R0915,W0127, R0912
+# pylint: disable=R0914,R0915,W0127, R0912,C0301
 
 from datetime import date, datetime, timezone
 
@@ -17,7 +17,7 @@ from solarpark.persistence.models.economics import Economics
 from solarpark.persistence.models.members import Member
 from solarpark.persistence.models.payments import Payment
 from solarpark.persistence.models.shares import Share
-from solarpark.persistence.shares import get_shares_by_member, get_shares_by_member_and_purchase_year
+from solarpark.persistence.shares import get_shares_by_member
 from solarpark.settings import settings
 
 
@@ -30,21 +30,26 @@ def make_dividend(
 
     batch_size = settings.ECONOMICS_BACKGROUND_BATCH
     for i in range(0, nr_of_economics, batch_size):
-        members_economics = get_all_economics_dividend(db, payment_year, range=[i, batch_size])
+        try:
+            members_economics = get_all_economics_dividend(db, range=[i, batch_size])
+            if not members_economics["data"]:
+                print("no data")
+        except Exception as ex:
+            get_logger().error(ex)
 
         if not members_economics or not members_economics["data"]:
             error_request = ErrorLogCreateRequest(
-                comment=f"Error: no dividends done for members in batch {i}",
+                comment=f"Error: no dividends done for members in batch {i}, {members_economics['data']}, {members_economics}",
                 resolved=False,
             )
             create_error(db_error, error_request)
             continue
 
         for member in members_economics["data"]:
-            if is_historical_fulfillment:
-                shares = get_shares_by_member_and_purchase_year(db, member.member_id, payment_year)
-            else:
-                shares = get_shares_by_member(db, member.member_id)
+            if member.last_dividend_year >= payment_year:
+                continue
+
+            shares = get_shares_by_member(db, member.member_id)
 
             if not shares["total"] or not shares["data"]:
                 error_request = ErrorLogCreateRequest(
@@ -112,14 +117,15 @@ def make_dividend(
 
             # Should we reinvest and create new shares or not
             nr_reinvest_shares = int(member.account_balance // settings.SHARE_PRICE)
-            total_investment = total_investment + nr_reinvest_shares * settings.SHARE_PRICE
-            current_value = current_value + nr_reinvest_shares * settings.SHARE_PRICE
             account_balance = account_balance - nr_reinvest_shares * settings.SHARE_PRICE
             disbursed = disbursed
             reinvested = reinvested + nr_reinvest_shares * settings.SHARE_PRICE
 
             if not is_historical_fulfillment and nr_reinvest_shares > 0:
                 nr_of_shares = nr_of_shares + nr_reinvest_shares
+                total_investment = total_investment + nr_reinvest_shares * settings.SHARE_PRICE
+                current_value = current_value + nr_reinvest_shares * settings.SHARE_PRICE
+
                 for _ in range(nr_reinvest_shares):
                     share = Share(
                         member_id=member.member_id,

@@ -2,7 +2,6 @@ from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
 from solarpark.persistence.database import Base, utcnow
-from solarpark.persistence.models.dividends import Dividend
 from solarpark.persistence.models.members import Member
 
 
@@ -18,11 +17,10 @@ class Economics(Base):
     account_balance = Column(Float, nullable=True)
     pay_out = Column(Boolean, default=False)
     disbursed = Column(Float, nullable=True)
-    last_dividend_year = Column(Integer, ForeignKey("dividends.payment_year"), nullable=True)
+    last_dividend_year = Column(Integer, nullable=False)
     issued_dividend = Column(DateTime, nullable=True)
     created_at = Column(DateTime, server_default=utcnow())
     updated_at = Column(DateTime, onupdate=utcnow())
 
     # Relationships
     members = relationship(Member)
-    dividends = relationship(Dividend)

@@ -69,6 +69,7 @@ def create_economics_for_all_members(db: Session):
                             current_value=current_value,
                             account_balance=0,
                             reinvested=0,
+                            last_dividend_year=0,
                             pay_out=False,
                         ),
                     )

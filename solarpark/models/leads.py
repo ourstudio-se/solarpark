@@ -60,10 +60,10 @@ class LeadUpdateRequest(BaseModel):
     org_name: Optional[str] = None
     org_number: Optional[str] = None
     street_address: Optional[str] = None
-    zip_code: Optional[int] = None
+    zip_code: Optional[str] = None
     locality: Optional[str] = None
     email: str
-    telephone: Optional[int] = None
+    telephone: Optional[str] = None
     existing_id: Optional[int] = None
     quantity_shares: int
     generate_certificate: Optional[bool] = None

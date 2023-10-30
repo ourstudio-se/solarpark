@@ -57,10 +57,7 @@ def send_certificate_with_sendgrid(
     mail = Email(
         subject="Andelsbevis Solar Park",
         to_emails=[
-            "joar@ourstudio.se",
             "simon@ourstudio.se",
-            "jessica@vikegard.se",
-            "patrik.bostrom.hbg@gmail.com",
         ],  # Change
         from_email=settings.SENDGRID_EMAIL_FROM,
         html_content=html_mail,

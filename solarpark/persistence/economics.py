@@ -1,7 +1,7 @@
 # pylint: disable=singleton-comparison,W0622
 from typing import Dict, List
 
-from sqlalchemy import func, or_, text
+from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
 from solarpark.models.economics import EconomicsCreateRequest, EconomicsUpdateRequest
@@ -17,6 +17,7 @@ def create_economics(db: Session, economics_request: EconomicsCreateRequest):
         reinvested=economics_request.reinvested,
         account_balance=economics_request.account_balance,
         pay_out=economics_request.pay_out,
+        last_dividend_year=economics_request.last_dividend_year,
         disbursed=economics_request.disbursed,
     )
     db.add(economics)
@@ -73,15 +74,9 @@ def get_all_economics(db: Session, sort: List, range: List) -> Dict:
     }
 
 
-def get_all_economics_dividend(db: Session, payment_year: int, range: List) -> Dict:
-
+def get_all_economics_dividend(db: Session, range: List) -> Dict:
     return {
-        "data": db.query(Economics)
-        .filter(or_(Economics.last_dividend_year == None, Economics.last_dividend_year < payment_year))  # noqa: E711
-        .order_by(Economics.id)
-        .offset(range[0])
-        .limit(range[1])
-        .all(),
+        "data": db.query(Economics).order_by(Economics.id).offset(range[0]).limit(range[1]).all(),
     }
 
 

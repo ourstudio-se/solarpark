@@ -148,6 +148,8 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
             account_balance=member.account_balance,
             pay_out=member.pay_out,
             disbursed=member.disbursed,
+            last_dividend_year=member.last_dividend_year,
+            issued_dividend=member.issued_dividend,
         )
 
         update_economics(db, member.id, member_update_request)

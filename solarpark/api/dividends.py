@@ -126,7 +126,9 @@ async def make_dividend_endpoint(
     db: Session = Depends(get_db),
     background_tasks: BackgroundTasks = BackgroundTasks(),
 ):
+
     dividend = get_dividend_by_year(db, payment_year)
+
     if dividend and dividend["data"]:
         if len(dividend["data"]) != 1:
             raise HTTPException(status_code=400, detail="no dividend found or no unique dividend ")
@@ -134,9 +136,19 @@ async def make_dividend_endpoint(
     else:
         raise HTTPException(status_code=400, detail="no dividend found")
 
+    if amount == 0:
+        dividend_update = DividendUpdateRequest(dividend_per_share=amount, payment_year=payment_year, completed=True)
+        try:
+            update_dividend(db, dividend["data"][0].id, dividend_update)
+        except Exception as ex:
+            raise HTTPException(status_code=400, detail="error updating dividend") from ex
+
+        return {"message": "dividend done"}
+
     economics = get_all_economics(db, [], [])
     if economics and economics["total"]:
         nr_of_economics = economics["total"]
+        print(nr_of_economics)
     else:
         raise HTTPException(status_code=400, detail="economics not found")
 

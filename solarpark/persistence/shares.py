@@ -61,10 +61,7 @@ def get_shares_by_member(db: Session, member_id: int):
 
 def get_shares_by_member_and_purchase_year(db: Session, member_id: int, year: int):
     result = (
-        db.query(Share)
-        .filter(Share.member_id == member_id)
-        .filter(extract("year", Share.purchased_at) <= (year + 1))
-        .all()
+        db.query(Share).filter(Share.member_id == member_id).filter(extract("year", Share.purchased_at) < year).all()
     )
     return {"data": result, "total": len(result)}
 
