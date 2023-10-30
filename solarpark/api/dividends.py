@@ -148,7 +148,6 @@ async def make_dividend_endpoint(
     economics = get_all_economics(db, [], [])
     if economics and economics["total"]:
         nr_of_economics = economics["total"]
-        print(nr_of_economics)
     else:
         raise HTTPException(status_code=400, detail="economics not found")
 
