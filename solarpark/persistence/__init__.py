@@ -32,8 +32,6 @@ def make_dividend(
     for i in range(0, nr_of_economics, batch_size):
         try:
             members_economics = get_all_economics_dividend(db, range=[i, batch_size])
-            if not members_economics["data"]:
-                print("no data")
         except Exception as ex:
             get_logger().error(ex)
 
