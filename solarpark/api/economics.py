@@ -100,11 +100,15 @@ async def get_all_economics_endpoint(
                 return get_economics_by_list_ids(db, filter_obj["id"])
             return get_economics(db, filter_obj["id"])
         if filter_obj and "member_id" in filter_obj:
-            return get_economics_by_member(db, filter_obj["member_id"])
+            if filter_obj["member_id"].isnumeric():
+                return get_economics_by_member(db, int(filter_obj["member_id"]))
+            return Economics(data=[], total=0)
 
         return get_all_economics(db, sort=sort_obj, range=range_obj)
     except json.JSONDecodeError as ex:
         raise HTTPException(status_code=400, detail="error decoding filter, sort or range parameters") from ex
+    except Exception as ex:
+        raise HTTPException(status_code=400, detail="error retrieving economics") from ex
 
 
 @router.delete("/economics/{economics_id}", summary="Delete economics")
