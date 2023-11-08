@@ -29,3 +29,8 @@ class utcnow(expression.FunctionElement):
 @compiles(utcnow, "postgresql")
 def pg_utcnow(element, compiler, **kw):  # pylint: disable=W0613
     return "TIMEZONE('utc', CURRENT_TIMESTAMP)"
+
+
+@compiles(utcnow, "sqlite")
+def sqlite_utcnow(element, compiler, **kw):  # pylint: disable=W0613
+    return "DATETIME('now', 'utc')"
