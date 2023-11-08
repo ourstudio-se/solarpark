@@ -4,6 +4,7 @@ import json
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from structlog import get_logger
 
 from solarpark.api import parse_integrity_error_msg
 from solarpark.models.economics import Economics, EconomicsCreateRequest, EconomicsUpdateRequest, SingleEconomics
@@ -100,14 +101,15 @@ async def get_all_economics_endpoint(
                 return get_economics_by_list_ids(db, filter_obj["id"])
             return get_economics(db, filter_obj["id"])
         if filter_obj and "member_id" in filter_obj:
-            if filter_obj["member_id"].isnumeric():
-                return get_economics_by_member(db, int(filter_obj["member_id"]))
+            if isinstance(filter_obj["member_id"], int):
+                return get_economics_by_member(db, filter_obj["member_id"])
             return Economics(data=[], total=0)
 
         return get_all_economics(db, sort=sort_obj, range=range_obj)
     except json.JSONDecodeError as ex:
         raise HTTPException(status_code=400, detail="error decoding filter, sort or range parameters") from ex
     except Exception as ex:
+        get_logger().error(ex)
         raise HTTPException(status_code=400, detail="error retrieving economics") from ex
 
 
