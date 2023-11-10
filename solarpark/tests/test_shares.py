@@ -20,6 +20,7 @@ def create_member():
         "zip_code": "12345",
     }
 
+
 @pytest.fixture
 def create_share():
     return {
@@ -55,7 +56,7 @@ def test_create_share(fixture: Fixture, create_share):
     response = fixture.client.post("/shares", json=create_share)
     assert response.status_code == 200
     assert response.json()["data"]["comment"] == "test"
-    assert response.json()["data"]["from_internal_account"] == False
+    assert response.json()["data"]["from_internal_account"] == 0
     assert response.json()["data"]["initial_value"] == 3000
 
 
@@ -63,7 +64,15 @@ def test_update_share(fixture: Fixture, update_share):
     response = fixture.client.put("/shares/1", json=update_share)
     assert response.status_code == 200
     assert response.json()["data"]["comment"] == "test update"
-    assert response.json()["data"]["from_internal_account"] == False
+    assert response.json()["data"]["from_internal_account"] == 0
     assert response.json()["data"]["initial_value"] == 3000
     assert response.json()["data"]["current_value"] == 2000
 
+
+def test_get_share(fixture: Fixture):
+    response = fixture.client.get("/shares/1")
+    assert response.status_code == 200
+    assert response.json()["data"]["comment"] == "test update"
+    assert response.json()["data"]["from_internal_account"] == 0
+    assert response.json()["data"]["initial_value"] == 3000
+    assert response.json()["data"]["current_value"] == 2000
