@@ -4,108 +4,111 @@
 		<meta charset="utf-8" />
 		<title>Andelsbevis Solar Park</title>
 
-		<style>
-			.left {
-				float: left;
-				text-align: left;
-				padding-right: 10px;
-			}
+    <style>
+      body {
+        border: 8px solid #4dc4be;
+        padding: 40px;
+        font-family: Arial, Helvetica, sans-serif;
+      }
 
-			.center {
-				text-align: center;
-			}
+      .section {
+        margin-bottom: 96px;
+        text-align: center;
+      }
 
-			.right {
-				float: right;
-				text-align: right;
-				padding-left: 10px;
-			}
+      .section :first-child {
+        margin-top: 0;
+      }
 
-			.border {
-				border: 8px solid yellow;
-				margin: 100px;
-			}
-		</style>
-	</head>
+      .section :last-child {
+        margin-bottom: 0;
+      }
 
-	<body>
-		<div class="border">
-			<p style="text-align: center">&nbsp;</p>
-			<p style="text-align: center">&nbsp;</p>
-			<p style="text-align: center">
-				<img src="{{image_path}}" style="width: 270px" />
-			</p>
+      .footer {
+        text-align: center;
+      }
 
-			<p style="text-align: center">&nbsp;</p>
-			<p style="text-align: center">&nbsp;</p>
-			<p style="text-align: center">&nbsp;</p>
+      h1,
+      h2 {
+        margin-top: 0;
+      }
 
-			<h1 class="center">
-				<span style="font-family: arial, helvetica, sans-serif; font-size: 38px">ANDELSBEVIS</span>
-			</h1>
+      h1 {
+        font-size: 2rem;
+        text-transform: uppercase;
+      }
 
-			<div class="center">
-				<p>
-					<span style="font-family: arial, helvetica, sans-serif; text-align: center"
-						>Andelsnummer - Datum</span
-					>
-				</p>
-				{% for share in shares %}
-				<p style="text-align: center">
-					<span style="font-family: arial, helvetica, sans-serif; text-align: center"
-						>{{ share.id }} - {{ share.purchased_at }}</span
-					>
-				</p>
-				{% endfor %}
-			</div>
+      h2 {
+        font-size: 1.125rem;
+      }
 
-			<p style="text-align: center">&nbsp;</p>
-			<p style="text-align: center">&nbsp;</p>
-			<p style="text-align: center">&nbsp;</p>
-			<p style="text-align: center">&nbsp;</p>
-			<p style="text-align: center">&nbsp;</p>
+      .logo {
+        display: block;
+        width: 220px;
+        margin: 0 auto;
+      }
 
-			<h4 class="center">
-				<font face="arial, helvetica, sans-serif">Solel i Helsingborg Ekonomisk förening</font>
-				<p></p>
-				<font face="arial, helvetica, sans-serif">769629–1090</font>
-			</h4>
+      .signature {
+        display: table;
+        width: 100%;
+      }
 
-			<p style="text-align: center">&nbsp;</p>
-			<p style="text-align: center">&nbsp;</p>
-			<p style="text-align: center">&nbsp;</p>
-			<p style="text-align: center">&nbsp;</p>
-			<p style="text-align: center">&nbsp;</p>
+      .signature__row {
+        display: table-row;
+      }
 
-			<div style="margin: 40px">
-				<h3 class="left">
-					<span style="font-family: arial, helvetica, sans-serif">{{ id }}</span>
-					<span style="font-family: arial, helvetica, sans-serif">{{ name }}</span>
-					<span>
-						<hr style="border-top: 1px solid black" />
-					</span>
-					<span style="font-family: arial, helvetica, sans-serif">Medl.nr. Andelsägare</span>
-				</h3>
+      .signature__cell {
+        display: table-cell;
+        width: 280px;
+        text-align: left;
+        vertical-align: bottom;
+      }
 
-				<h3 class="right">
-					<span>
-						<hr style="border-top: 1px solid black" />
-					</span>
-					<span style="font-family: arial, helvetica, sans-serif">Lars-Inge Persson</span>
-					<span style="font-family: arial, helvetica, sans-serif">Ordförande</span>
-				</h3>
-			</div>
+      .signature__cell--spacing {
+        display: table-cell;
+        min-width: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="section">
+      <img src="{{image_path}}" alt="Solarpark" class="logo" />
+    </div>
 
-			<p style="text-align: center">&nbsp;</p>
-			<p style="text-align: center">&nbsp;</p>
-			<p style="text-align: center">&nbsp;</p>
-			<p style="text-align: center">&nbsp;</p>
+    <div class="section">
+      <h1>Andelsbevis</h1>
+      <p>
+        <strong>Andelsnummer - Datum</strong>
+      </p>
+      {% for share in shares %}
+      <p>{{ share.id }} - {{ share.purchased_at }}</p>
+      {% endfor %}
+    </div>
 
-			<div class="center">
-				<h5>
-					<font face="arial, helvetica, sans-serif">Utfärdat {{today}}</font>
-				</h5>
-			</div>
-		</div>
-	</body>
+    <div class="section">
+      <h2>Solel i Helsingborg Ekonomisk förening</h2>
+      <p>769629–1090</p>
+    </div>
+
+    <div class="section">
+      <div class="signature">
+        <div class="signature__row">
+          <div class="signature__cell">
+            <div>{{ id }} {{ name }}</div>
+            <hr />
+            <div>Medl.nr. Andelsägare</div>
+          </div>
+          <div class="signature__cell--spacing"></div>
+          <div class="signature__cell">
+            <hr />
+            <div>Lars-Inge Persson, Ordförande</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <strong>Utfärdat {{today}}</strong>
+    </div>
+  </body>
 </html>
