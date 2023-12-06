@@ -61,7 +61,7 @@ def test_get_member(fixture: Fixture):
 
 
 def test_get_member_does_not_exist(fixture: Fixture):
-    response = fixture.client.get("/members/2")
+    response = fixture.client.get("/members/3")
     assert response.status_code == 404
 
 
