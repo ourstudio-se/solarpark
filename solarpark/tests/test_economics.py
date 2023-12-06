@@ -31,6 +31,7 @@ def create_share():
         "from_internal_account": "false",
     }
 
+
 @pytest.fixture
 def create_economics():
     return {
@@ -45,6 +46,7 @@ def create_economics():
         "last_dividend_year": "0",
         "issued_dividend": "0",
     }
+
 
 @pytest.fixture
 def update_economics():
@@ -83,10 +85,10 @@ def test_create_economics(fixture: Fixture, create_economics):
     assert response.json()["data"]["nr_of_shares"] == 1
     assert response.json()["data"]["reinvested"] == 0
     assert response.json()["data"]["pay_out"] == 0
-    
 
-def test_get_econmics(fixture: Fixture):
-    response = fixture.client.get("economics/1")
+
+def test_get_economics(fixture: Fixture):
+    response = fixture.client.get("/economics/1")
     assert response.status_code == 200
     assert response.json()["data"]["nr_of_shares"] == 1
     assert response.json()["data"]["reinvested"] == 0
@@ -103,11 +105,10 @@ def test_update_economics(fixture: Fixture, update_economics):
 
 
 def test_delete_economics(fixture: Fixture):
-    response = fixture.client.delete("economics/1")
+    response = fixture.client.delete("/economics/1")
     assert response.status_code == 200
 
 
-def test_get_econmics1(fixture: Fixture):
-    response = fixture.client.get("economics/1")
+def test_get_economics_after_delete(fixture: Fixture):
+    response = fixture.client.get("/economics/1")
     assert response.status_code == 404
-   
