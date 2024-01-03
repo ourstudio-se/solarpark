@@ -217,7 +217,7 @@ def delete_all_member_data(db: Session, member_id: int):
     except Exception as ex:
         error_request = ErrorLogCreateRequest(
             member_id=member_id,
-            comment=f"Error resetting member sequence after deletion of share {member_id}, details: {ex}",
+            comment=f"Error resetting member sequence after deletion of member {member_id}, details: {ex}",
             resolved=False,
         )
         create_error(db, error_request)
