@@ -183,7 +183,6 @@ def delete_share(db: Session, share_id: int):
 
     try:
         db.commit()
-        return share["data"][0]
     except Exception as ex:
         db.rollback()
         error_request = ErrorLogCreateRequest(
@@ -194,3 +193,19 @@ def delete_share(db: Session, share_id: int):
         )
         create_error(db, error_request)
         return False
+
+    try:
+        last_item = db.query(Share).order_by(Share.id.desc()).first()
+        alter_sequence_query = f"ALTER SEQUENCE shares_id_seq RESTART WITH {last_item.id+1}"
+        db.execute(text(alter_sequence_query))
+        db.commit()
+    except Exception as ex:
+        error_request = ErrorLogCreateRequest(
+            share_id=share_id,
+            member_id=member_id,
+            comment=f"Error resetting share sequence after deletion of share {share_id}, details: {ex}",
+            resolved=False,
+        )
+        create_error(db, error_request)
+
+    return share["data"][0]

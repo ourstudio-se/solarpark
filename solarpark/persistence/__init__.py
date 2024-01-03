@@ -2,7 +2,7 @@
 
 from datetime import date, datetime, timezone
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 from structlog import get_logger
 
@@ -199,7 +199,6 @@ def delete_all_member_data(db: Session, member_id: int):
 
     try:
         db.commit()
-        return member
     except Exception as ex:
         db.rollback()
         error_request = ErrorLogCreateRequest(
@@ -209,3 +208,18 @@ def delete_all_member_data(db: Session, member_id: int):
         )
         create_error(db_error, error_request)
         return False
+
+    try:
+        last_item = db.query(Member).order_by(Member.id.desc()).first()
+        alter_sequence_query = f"ALTER SEQUENCE members_id_seq RESTART WITH {last_item.id+1}"
+        db.execute(text(alter_sequence_query))
+        db.commit()
+    except Exception as ex:
+        error_request = ErrorLogCreateRequest(
+            member_id=member_id,
+            comment=f"Error resetting member sequence after deletion of share {member_id}, details: {ex}",
+            resolved=False,
+        )
+        create_error(db, error_request)
+
+    return member
