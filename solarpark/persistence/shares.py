@@ -81,6 +81,27 @@ def count_all_shares(db: Session):
     return all_shares, reinvested_shares, org_more_than_one_share
 
 
+def all_members_with_shares(db: Session):
+    org_with_shares = (
+        db.query(Member)
+        .join(Share, Member.id == Share.member_id)
+        .filter(Member.org_name != None)  # noqa: E711
+        .group_by(Member.id)
+        .having(func.count(Share.id) > 0)
+        .count()
+    )
+
+    all_with_shares = (
+        db.query(Member)
+        .join(Share, Member.id == Share.member_id)
+        .group_by(Member.id)
+        .having(func.count(Share.id) > 0)
+        .count()
+    )
+
+    return all_with_shares, org_with_shares
+
+
 def delete_shares_by_member(db: Session, member_id: int):
     deleted = db.query(Share).filter(Share.member_id == member_id).delete()
     if deleted == 1:

@@ -1,7 +1,7 @@
 # pylint: disable=singleton-comparison,W0622
 from typing import Dict, List
 
-from sqlalchemy import text
+from sqlalchemy import and_, text
 from sqlalchemy.orm import Session
 
 from solarpark.models.members import MemberCreateRequest, MemberUpdateRequest
@@ -9,16 +9,25 @@ from solarpark.persistence.models.members import Member
 
 
 def find_member(db: Session, term: str):
-    result = (
-        db.query(Member)
-        .filter(
-            Member.firstname.ilike(f"%{term}%")
-            | Member.lastname.ilike(f"%{term}%")
-            | Member.org_name.ilike(f"%{term}%")
-            | Member.email.ilike(f"%{term}%")
+    split_term = term.split(" ")
+
+    if len(split_term) == 2:
+        result = (
+            db.query(Member)
+            .filter(and_(Member.firstname.ilike(f"%{split_term[0]}%"), Member.lastname.ilike(f"%{split_term[1]}%")))
+            .all()
         )
-        .all()
-    )
+    else:
+        result = (
+            db.query(Member)
+            .filter(
+                Member.firstname.ilike(f"%{term}%")
+                | Member.lastname.ilike(f"%{term}%")
+                | Member.org_name.ilike(f"%{term}%")
+                | Member.email.ilike(f"%{term}%")
+            )
+            .all()
+        )
     return {"data": result, "total": len(result)}
 
 

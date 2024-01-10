@@ -3,6 +3,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict
 
+from solarpark.persistence.database import utcnow
+
 
 class Lead(BaseModel):
     id: int
@@ -19,7 +21,9 @@ class Lead(BaseModel):
     existing_id: Optional[int] = None
     quantity_shares: int
     generate_certificate: Optional[bool] = False
+    purchased_at: datetime
     created_at: datetime
+    updated_at: Optional[datetime]
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -51,6 +55,7 @@ class LeadCreateRequest(BaseModel):
     existing_id: Optional[int] = None
     quantity_shares: int
     generate_certificate: bool = False
+    purchased_at: datetime = utcnow()
 
 
 class LeadUpdateRequest(BaseModel):
@@ -67,3 +72,4 @@ class LeadUpdateRequest(BaseModel):
     existing_id: Optional[int] = None
     quantity_shares: int
     generate_certificate: Optional[bool] = None
+    purchased_at: datetime

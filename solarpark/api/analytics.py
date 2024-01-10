@@ -5,9 +5,8 @@ from solarpark.persistence.database import get_db
 from solarpark.persistence.economics import get_total_account_balance, get_total_disbursed
 from solarpark.persistence.error_log import get_all_unresolved_errors
 from solarpark.persistence.leads import count_all_leads
-from solarpark.persistence.members import count_all_members
 from solarpark.persistence.payments import get_year_payments
-from solarpark.persistence.shares import count_all_shares
+from solarpark.persistence.shares import all_members_with_shares, count_all_shares
 from solarpark.settings import settings
 
 router = APIRouter()
@@ -16,8 +15,7 @@ router = APIRouter()
 @router.get("/analytics", summary="Get analytical data")
 async def get_analytics_endpoint(db: Session = Depends(get_db)):
     try:
-        all_members = count_all_members(db, filter_on_org=False)
-        all_member_organizations = count_all_members(db, filter_on_org=True)
+        all_members, all_member_organizations = all_members_with_shares(db)
         all_shares, reinvested_shares, org_more_than_one_share = count_all_shares(db)
         total_account_balance = get_total_account_balance(db)
         total_disbursed = get_total_disbursed(db)

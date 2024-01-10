@@ -1,5 +1,4 @@
 # pylint: disable=W0511, R0914,  W0622
-from datetime import datetime, timezone
 from typing import Dict, List
 
 from sqlalchemy import text
@@ -98,6 +97,7 @@ def create_lead(db: Session, lead_request: LeadCreateRequest):
         existing_id=lead_request.existing_id,
         quantity_shares=lead_request.quantity_shares,
         generate_certificate=lead_request.generate_certificate,
+        purchased_at=lead_request.purchased_at,
     )
 
     db.add(lead)
@@ -127,7 +127,7 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
 
         share_request = ShareCreateRequest(
             comment=comment,
-            purchased_at=datetime.now(timezone.utc),
+            purchased_at=lead.purchased_at,
             member_id=existing_member_id,
             initial_value=settings.SHARE_PRICE,
             from_internal_account=False,
@@ -168,14 +168,14 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
         org_number=lead.org_number,
         street_address=lead.street_address,
         telephone=lead.telephone,
-        year=datetime.now(timezone.utc),
+        year=lead.purchased_at,
         zip_code=lead.zip_code,
     )
     new_member = create_member(db, member_request)
     new_member_id = new_member.id
     share_request = ShareCreateRequest(
         comment=comment,
-        purchased_at=datetime.now(timezone.utc),
+        purchased_at=lead.purchased_at,
         member_id=new_member_id,
         initial_value=settings.SHARE_PRICE,
         from_internal_account=False,
