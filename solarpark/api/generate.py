@@ -19,6 +19,7 @@ def get_image_path():
 
 
 def generate_certificate_pdf(member, shares):
+    shares.sort(key=lambda x: x.id)
     context = {
         "title": "Andelsbevis Solar Park",
         "id": member.id,
