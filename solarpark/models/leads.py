@@ -1,9 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict
-
-from solarpark.persistence.database import utcnow
 
 
 class Lead(BaseModel):
@@ -55,7 +53,7 @@ class LeadCreateRequest(BaseModel):
     existing_id: Optional[int] = None
     quantity_shares: int
     generate_certificate: bool = False
-    purchased_at: datetime = utcnow()
+    purchased_at: datetime = datetime.now(timezone.utc)
 
 
 class LeadUpdateRequest(BaseModel):

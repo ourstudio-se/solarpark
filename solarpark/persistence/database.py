@@ -1,8 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import declarative_base, sessionmaker
-from sqlalchemy.sql import expression
-from sqlalchemy.types import DateTime
 
 from solarpark.settings import settings
 
@@ -19,18 +16,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
-class utcnow(expression.FunctionElement):
-    type = DateTime()
-    inherit_cache = True
-
-
-@compiles(utcnow, "postgresql")
-def pg_utcnow(element, compiler, **kw):  # pylint: disable=W0613
-    return "TIMEZONE('utc', CURRENT_TIMESTAMP)"
-
-
-@compiles(utcnow, "sqlite")
-def sqlite_utcnow(element, compiler, **kw):  # pylint: disable=W0613
-    return "DATETIME('now', 'utc')"
