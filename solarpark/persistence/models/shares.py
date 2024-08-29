@@ -1,7 +1,7 @@
-from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String, func
 from sqlalchemy.orm import relationship
 
-from solarpark.persistence.database import Base, utcnow
+from solarpark.persistence.database import Base
 from solarpark.persistence.members import Member
 
 
@@ -15,8 +15,8 @@ class Share(Base):
     current_value = Column(Float, nullable=False)
     purchased_at = Column(DateTime, nullable=False)
     from_internal_account = Column(Boolean, nullable=False)
-    created_at = Column(DateTime, server_default=utcnow())
-    updated_at = Column(DateTime, onupdate=utcnow())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
     members = relationship(Member)

@@ -1,6 +1,6 @@
-from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import Column, DateTime, Integer, String, func
 
-from solarpark.persistence.database import Base, utcnow
+from solarpark.persistence.database import Base
 
 
 class Member(Base):
@@ -19,5 +19,5 @@ class Member(Base):
     bank = Column(String, nullable=True)
     swish = Column(String, nullable=True)
     year = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, server_default=utcnow())
-    updated_at = Column(DateTime, onupdate=utcnow())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())

@@ -1,6 +1,6 @@
-from sqlalchemy import Boolean, Column, DateTime, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, func
 
-from solarpark.persistence.database import Base, utcnow
+from solarpark.persistence.database import Base
 
 
 class Lead(Base):
@@ -20,6 +20,6 @@ class Lead(Base):
     existing_id = Column(Integer, nullable=True)
     quantity_shares = Column(Integer, nullable=False)
     generate_certificate = Column(Boolean, nullable=True)
-    purchased_at = Column(DateTime, server_default=utcnow())
-    created_at = Column(DateTime, server_default=utcnow())
-    updated_at = Column(DateTime, onupdate=utcnow())
+    purchased_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())

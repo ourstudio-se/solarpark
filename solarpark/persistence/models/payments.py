@@ -1,7 +1,7 @@
-from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, func
 from sqlalchemy.orm import relationship
 
-from solarpark.persistence.database import Base, utcnow
+from solarpark.persistence.database import Base
 from solarpark.persistence.models.members import Member
 
 
@@ -13,8 +13,8 @@ class Payment(Base):
     year = Column(Integer, nullable=True)
     amount = Column(Float, nullable=True)
     paid_out = Column(Boolean, nullable=True)
-    created_at = Column(DateTime, server_default=utcnow())
-    updated_at = Column(DateTime, onupdate=utcnow())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
     members = relationship(Member)
