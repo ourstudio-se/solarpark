@@ -39,6 +39,9 @@ def send_certificate_with_sendgrid(
     member = members["data"][0]
     shares = shares["data"]
 
+    if member.email is None:
+        raise HTTPException(status_code=400, detail="member has no email")
+
     context = {
         "title": "Andelsbevis Solar Park",
         "id": member.id,
@@ -56,12 +59,7 @@ def send_certificate_with_sendgrid(
 
     mail = Email(
         subject="Andelsbevis Solar Park",
-        to_emails=[
-            "joar@ourstudio.se",
-            "simon@ourstudio.se",
-            "jessica@vikegard.se",
-            "patrik.bostrom.hbg@gmail.com",
-        ],  # Change
+        to_emails=[member.email],
         from_email=settings.SENDGRID_EMAIL_FROM,
         html_content=html_mail,
         attachments=[
