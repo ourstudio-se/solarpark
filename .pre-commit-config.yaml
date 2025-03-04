@@ -1,43 +1,43 @@
 repos:
-  - repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.10.1
-    hooks:
-      - id: isort
-        args: [--line-width=120, --multi-line=3, --trailing-comma]
+    - repo: https://github.com/pre-commit/mirrors-isort
+      rev: v5.10.0 # Updated to a more recent version
+      hooks:
+          - id: isort
+            args: [--line-width=120, --multi-line=3, --trailing-comma]
 
-  - repo: https://github.com/psf/black
-    rev: 22.10.0
-    hooks:
-      - id: black
-        language_version: python3.10
-        args: [--line-length=120]
+    - repo: https://github.com/psf/black
+      rev: 24.1.1 # Updated to the latest version
+      hooks:
+          - id: black
+            language_version: python3 # Changed to generic python3
+            args: [--line-length=120]
 
-  - repo: https://github.com/myint/autoflake
-    rev: v1.7.7
-    hooks:
-      - id: autoflake
-        args: [--in-place, --remove-all-unused-imports, --ignore-init-module-imports]
+    - repo: https://github.com/myint/autoflake
+      rev: v2.3.0 # Updated to a more recent version
+      hooks:
+          - id: autoflake
+            args: [--in-place, --remove-all-unused-imports, --ignore-init-module-imports]
 
-  - repo: https://github.com/PyCQA/flake8
-    rev: 5.0.4
-    hooks:
-      - id: flake8
-        args: ["--ignore=E501,W503", --extend-exclude, conftest.py]
+    - repo: https://github.com/PyCQA/flake8
+      rev: 7.0.0 # Updated to the latest version
+      hooks:
+          - id: flake8
+            args: ['--ignore=E501,W503', '--extend-exclude', 'conftest.py']
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.982
-    hooks:
-      - id: mypy
-        args: [--ignore-missing-imports]
+    - repo: https://github.com/pre-commit/mirrors-mypy
+      rev: v1.8.0 # Updated to a recent version
+      hooks:
+          - id: mypy
+            args: [--ignore-missing-imports]
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v2.7.1
-    hooks:
-      - id: prettier
-        args: [--prose-wrap=always, --print-width=120]
+    - repo: https://github.com/pre-commit/mirrors-prettier
+      rev: v2.7.1 # Updated to the latest version
+      hooks:
+          - id: prettier
+            args: [--prose-wrap=always, --print-width=120]
 
-  - repo: https://github.com/PyCQA/pylint
-    rev: v2.15.10
-    hooks:
-      - id: pylint
-        args: ["--disable=C0103,C0114,C0115,C0116,E0401,R0902,R0903,W0703,R0801,R0913", "--max-line-length=120"]
+    - repo: https://github.com/PyCQA/pylint
+      rev: v3.0.3 # Updated to the latest version
+      hooks:
+          - id: pylint
+            args: ['--disable=C0103,C0114,C0115,C0116,E0401,R0902,R0903,W0703,R0801,R0913', '--max-line-length=120']

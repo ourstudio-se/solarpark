@@ -11,7 +11,8 @@ from solarpark.models.email import Attachment, Email
 from solarpark.persistence.database import get_db
 from solarpark.persistence.members import get_member
 from solarpark.persistence.shares import get_shares_by_member
-from solarpark.services import sendgrid_client
+from solarpark.services import resend_client, sendgrid_client
+from solarpark.services.resend import ResendEmailClient
 from solarpark.services.sendgrid import SendGridClient
 from solarpark.settings import settings
 
@@ -82,3 +83,37 @@ async def send_certificate(
     background_tasks: BackgroundTasks = BackgroundTasks(),
 ):
     background_tasks.add_task(send_certificate_with_sendgrid, sendgrid, db, member_id)
+
+
+def send_summary_with_resend(resend_client: ResendEmailClient):
+
+    res = resend_client.send_email(
+        to="simon@ourstudio.se",
+        subject="Hello from Backend!",
+        html="<p>This is a <strong>test email</strong> sent via Resend.</p>",
+        text="This is a test email sent via Resend.",
+    )
+    a = 20
+    print(res)
+
+
+@router.post(
+    "/email",
+    summary="Test sending email",
+    status_code=202,
+)
+async def send_summary_mail(
+    member_id: int,
+    resend: ResendEmailClient = Depends(resend_client),
+    background_tasks: BackgroundTasks = BackgroundTasks(),
+):
+
+    res = resend.send_email(
+        to="simon@ourstudio.se",
+        subject="Hello from Backend!",
+        html="<p>This is a <strong>test email</strong> sent via Resend.</p>",
+        text="This is a test email sent via Resend.",
+    )
+    a = 20
+    print(res)
+    background_tasks.add_task(send_summary_with_resend, resend, member_id)
