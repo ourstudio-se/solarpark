@@ -211,7 +211,7 @@ def delete_all_member_data(db: Session, member_id: int):
 
     try:
         last_item = db.query(Member).order_by(Member.id.desc()).first()
-        alter_sequence_query = f"ALTER SEQUENCE members_id_seq RESTART WITH {last_item.id+1}"
+        alter_sequence_query = f"ALTER SEQUENCE members_id_seq RESTART WITH {last_item.id + 1}"
         db.execute(text(alter_sequence_query))
         db.commit()
     except Exception as ex:
@@ -223,3 +223,12 @@ def delete_all_member_data(db: Session, member_id: int):
         create_error(db, error_request)
 
     return member
+
+
+# def get_member_data(db: Session, member_id: int):
+#     member = db.query(Member).filter(Member.id == member_id).first()
+#     economics = db.query(Economics).filter(Economics.member_id == member_id).first()
+#     shares = db.query(Share).filter(Share.member_id == member_id).all()
+#     payment = db.query(Payment).filter(Payment.member_id == member_id).all()
+
+#     return member, economics, shares, payment

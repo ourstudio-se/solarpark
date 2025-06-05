@@ -68,17 +68,19 @@ def get_shares_by_member_and_purchase_year(db: Session, member_id: int, year: in
 
 def count_all_shares(db: Session):
     all_shares = db.query(Share).count()
+    all_shares_solarpark_excluded = db.query(Share).filter(Share.member_id != 1).count()
     reinvested_shares = db.query(Share).filter(Share.from_internal_account == True).count()  # noqa: E712
     org_more_than_one_share = (
         db.query(Member)
         .join(Share, Member.id == Share.member_id)
         .filter(Member.org_name != None)  # noqa: E711
+        .filter(Member.id != 1)  # excludes solarpark
         .group_by(Member.id)
         .having(func.count(Share.id) > 1)
         .count()
     )
 
-    return all_shares, reinvested_shares, org_more_than_one_share
+    return all_shares, all_shares_solarpark_excluded, reinvested_shares, org_more_than_one_share
 
 
 def all_members_with_shares(db: Session):
@@ -217,7 +219,7 @@ def delete_share(db: Session, share_id: int):
 
     try:
         last_item = db.query(Share).order_by(Share.id.desc()).first()
-        alter_sequence_query = f"ALTER SEQUENCE shares_id_seq RESTART WITH {last_item.id+1}"
+        alter_sequence_query = f"ALTER SEQUENCE shares_id_seq RESTART WITH {last_item.id + 1}"
         db.execute(text(alter_sequence_query))
         db.commit()
     except Exception as ex:

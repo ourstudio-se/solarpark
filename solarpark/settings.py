@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     ALGORITHMS: str = "RS256"
     SENDGRID_API_KEY: str
     SENDGRID_EMAIL_FROM: str
-    RESEND_API_KEY: str
-    RESEND_EMAIL_FROM: str
+    # RESEND_API_KEY: str
+    # RESEND_EMAIL_FROM: str
     SHARE_PRICE: int = 3000
     ALLOW_ORIGINS: str
     ECONOMICS_BACKGROUND_BATCH: int = 20

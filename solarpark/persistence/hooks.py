@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from solarpark.api.admin import parse_birth_date
 from solarpark.models.leads import LeadCreateRequest
 from solarpark.persistence.leads import create_lead
+from solarpark.persistence.members import get_member_by_email
 
 
 def commit_email_hook(db: Session, request: Dict):
@@ -50,5 +51,9 @@ def commit_email_hook(db: Session, request: Dict):
         quantity_shares=int(quantity_shares),
         generate_certificate=generate_certificate,
     )
+    if existing_id is None:
+        existing_member = get_member_by_email(db, lead_request.email)
+        if existing_member["total"] == 1:
+            lead_request.existing_id = existing_member["data"][0].id
 
     return create_lead(db, lead_request)

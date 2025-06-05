@@ -82,7 +82,7 @@ def delete_lead(db: Session, lead_id):
 
 
 def create_lead(db: Session, lead_request: LeadCreateRequest):
-
+    # Add validation
     lead = Lead(
         firstname=lead_request.firstname,
         lastname=lead_request.lastname,
