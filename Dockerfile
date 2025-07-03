@@ -1,4 +1,4 @@
-FROM surnet/alpine-wkhtmltopdf:3.16.2-0.12.6-full as wkhtmltopdf
+FROM surnet/alpine-wkhtmltopdf:3.16.2-0.12.6-full AS wkhtmltopdf
 FROM python:3.13-alpine3.21
 
 # Install dependencies
