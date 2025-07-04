@@ -4,7 +4,7 @@ from typing import Dict, List
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from solarpark.api.send_email import send_certificate_with_sendgrid
+from solarpark.api.send_email import send_certificate
 from solarpark.models.economics import EconomicsCreateRequest, EconomicsUpdateRequest
 from solarpark.models.leads import LeadCreateRequest, LeadUpdateRequest
 from solarpark.models.members import MemberCreateRequest
@@ -13,7 +13,7 @@ from solarpark.persistence.economics import create_economics, get_economics_by_m
 from solarpark.persistence.members import create_member
 from solarpark.persistence.models.leads import Lead
 from solarpark.persistence.shares import create_share
-from solarpark.services import sendgrid_client
+from solarpark.services import loopia_client
 from solarpark.settings import settings
 
 
@@ -154,7 +154,7 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
 
         update_economics(db, member.id, member_update_request)
         if lead.generate_certificate:
-            send_certificate_with_sendgrid(sendgrid_client(), db, existing_member_id)
+            send_certificate(loopia_client(), db, existing_member_id)
 
         delete_lead(db, lead_id)
         return True
@@ -196,7 +196,7 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
 
     create_economics(db, member_create_request)
     if lead.generate_certificate:
-        send_certificate_with_sendgrid(sendgrid_client(), db, new_member_id)
+        send_certificate(loopia_client(), db, new_member_id)
 
     delete_lead(db, lead_id)
     return True

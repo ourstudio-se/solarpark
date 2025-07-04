@@ -1,33 +1,40 @@
+import smtplib
 from email.message import EmailMessage
+
+from structlog import get_logger
+
+from solarpark.models.email_t import Email
+from solarpark.settings import settings
 
 
 class LoopiaEmailClient:
+    def __init__(self):
+        self.email = settings.LOOPIA_EMAIL_FROM
+        self.password = settings.LOOPIA_PASSWORD
+        self.smtp_server = settings.LOOPIA_SMTP_SERVER
+        self.port = settings.LOOPIA_PORT
 
-    def __init__(self, email, password, smtp_server="mailcluster.loopia.se", port=587):
-        self.email = email
-        self.password = password
-        self.smtp_server = smtp_server
-        self.port = port
-
-        self.mime_types = {
-            ".pdf": ("application", "pdf"),
-            ".png": ("image", "png"),
-            ".jpg": ("image", "jpeg"),
-            ".jpeg": ("image", "jpeg"),
-        }
-
-    def create_message(self, to, subject, body_html=None, body_text=None) -> EmailMessage:
+    def send(self, email: Email):
         msg = EmailMessage()
         msg["From"] = self.email
-        msg["To"] = to if isinstance(to, str) else ", ".join(to)
-        msg["Subject"] = subject
+        msg["To"] = "simon@ourstudio.se"  # email.to_email
+        msg["Subject"] = email.subject
+        msg.set_content(email.html_content, subtype="html")
+        if email.attachments:
+            for attachment in email.attachments:
+                msg.add_attachment(
+                    attachment.file_content,
+                    maintype=attachment.main_type,
+                    subtype=attachment.sub_type,
+                    filename=attachment.file_name,
+                )
 
-        if body_html and body_text:
-            msg.set_content(body_text)
-            msg.add_alternative(body_html, subtype="html")
-        elif body_html:
-            msg.set_content(body_html, subtype="html")
-        else:
-            msg.set_content(body_text or "")
+        try:
+            with smtplib.SMTP(self.smtp_server, self.port) as server:
+                server.starttls()
+                server.login(self.email, self.password)
+                server.send_message(msg)
 
-        return msg
+            get_logger().info(f"Email sent successfully to {email.to_email} subject {email.subject}")
+        except Exception as e:
+            get_logger().error(f"Failed to send email to {email.to_email} subject {email.subject} err {str(e)}")

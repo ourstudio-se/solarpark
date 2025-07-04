@@ -1,13 +1,14 @@
 FROM surnet/alpine-wkhtmltopdf:3.16.2-0.12.6-full AS wkhtmltopdf
 FROM python:3.13-alpine3.21
 
+
 # Install dependencies
 RUN apk add --no-cache \
     libstdc++ \
     libx11 \
     libxrender \
     libxext \
-    libssl1.1 \
+    libssl3 \
     ca-certificates \
     fontconfig \
     freetype \
@@ -45,7 +46,7 @@ RUN pip install --upgrade pip && pip install wheel>=0.38.4 && pip install -r req
 
 ADD ./ .
 
-ENV PYTHONPATH "#{PYTHONPATH}:/app"
+ENV PYTHONPATH="${PYTHONPATH}:/app"
 
 RUN addgroup \
     --gid 1000 \
