@@ -8,8 +8,12 @@ class Settings(BaseSettings):
     API_AUDIENCE: str
     ISSUER: str
     ALGORITHMS: str = "RS256"
-    SENDGRID_API_KEY: str
-    SENDGRID_EMAIL_FROM: str
+
+    LOOPIA_EMAIL_FROM: str
+    LOOPIA_PASSWORD: str
+    LOOPIA_SMTP_SERVER: str = "mailcluster.loopia.se"
+    LOOPIA_PORT: int = 587
+
     SHARE_PRICE: int = 3000
     ALLOW_ORIGINS: str
     ECONOMICS_BACKGROUND_BATCH: int = 20

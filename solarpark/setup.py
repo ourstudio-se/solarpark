@@ -79,3 +79,8 @@ def add_routes(app) -> None:
         tags=["shares"],
         dependencies=[Depends(get_logger), Depends(api_security)],
     )
+    # app.include_router(
+    #     send_member_summary.router,
+    #     tags=["send_email"],
+    #     dependencies=[Depends(get_logger), Depends(api_security)],
+    # )

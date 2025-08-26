@@ -8,6 +8,11 @@ from solarpark.models.members import MemberCreateRequest, MemberUpdateRequest
 from solarpark.persistence.models.members import Member
 
 
+def get_member_by_email(db: Session, email: str):
+    result = db.query(Member).filter(Member.email == email).all()
+    return {"data": result, "total": len(result)}
+
+
 def find_member(db: Session, term: str):
     split_term = term.split(" ")
 
