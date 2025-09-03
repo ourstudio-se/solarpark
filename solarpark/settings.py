@@ -8,8 +8,6 @@ class Settings(BaseSettings):
     API_AUDIENCE: str
     ISSUER: str
     ALGORITHMS: str = "RS256"
-    SENDGRID_API_KEY: str
-    SENDGRID_EMAIL_FROM: str
     SHARE_PRICE: int = 3000
     ALLOW_ORIGINS: str
     ECONOMICS_BACKGROUND_BATCH: int = 20
