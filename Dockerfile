@@ -1,6 +1,8 @@
+# Stage 1: hämta wkhtmltopdf
 FROM surnet/alpine-wkhtmltopdf:3.22.0-0.12.6-full AS wkhtmltopdf
-FROM python:3.12-alpine3.21
 
+# Stage 2: Python-app
+FROM python:3.12-alpine3.21
 
 # Install dependencies
 RUN apk add --no-cache \
@@ -16,47 +18,40 @@ RUN apk add --no-cache \
     ttf-droid \
     ttf-freefont \
     ttf-liberation \
-    build-base \
-    postgresql-dev \
-    gcc \
-    openssl-dev \
-    openssl \
     curl \
-    sqlite-libs>=3.40.1-r0 \
-    # more fonts
+    sqlite-libs \
+    postgresql-dev \
     && apk add --no-cache --virtual .build-deps \
-    msttcorefonts-installer \
-    # Install microsoft fonts
-    && update-ms-fonts \
-    && fc-cache -f \
-    # Clean up when done
-    && rm -rf /tmp/* \
-    && apk del .build-deps
+       build-base gcc musl-dev openssl-dev msttcorefonts-installer \
+    && update-ms-fonts && fc-cache -f \
+    && apk del .build-deps \
+    && rm -rf /tmp/*
 
-# Copy wkhtmltopdf files from docker-wkhtmltopdf image
-COPY --from=wkhtmltopdf /bin/wkhtmltopdf /bin/wkhtmltopdf
-COPY --from=wkhtmltopdf /bin/wkhtmltoimage /bin/wkhtmltoimage
+# Kopiera wkhtmltopdf-binärer från stage 1
+COPY --from=wkhtmltopdf /bin/wkhtmltopdf /bin/
+COPY --from=wkhtmltopdf /bin/wkhtmltoimage /bin/
 COPY --from=wkhtmltopdf /bin/libwkhtmltox* /bin/
 
+# Arbetskatalog
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
+# Installera Python-dependencies först (bättre caching)
+COPY requirements.txt .
+RUN pip install --upgrade pip \
+ && pip install "wheel>=0.38.4" \
+ && pip install --no-cache-dir -r requirements.txt
 
-RUN pip install --upgrade pip && pip install wheel>=0.38.4 && pip install -r requirements.txt
+# Kopiera in all kod
+COPY . .
 
-ADD ./ .
+# Miljövariabler
+ENV PYTHONPATH=/app
 
-ENV PYTHONPATH=""
-ENV PYTHONPATH="${PYTHONPATH}:/app"
-
-RUN addgroup \
-    --gid 1000 \
-    -S solarpark-service
-RUN adduser \
-    --uid 1000 \
-    -G solarpark-service \
-    -S solarpark-service
+# Skapa icke-root-användare
+RUN addgroup -S solarpark-service -g 1000 \
+ && adduser -S solarpark-service -u 1000 -G solarpark-service
 
 USER solarpark-service
 
+# Startkommando
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
