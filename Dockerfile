@@ -32,26 +32,23 @@ COPY --from=wkhtmltopdf /bin/wkhtmltopdf /bin/
 COPY --from=wkhtmltopdf /bin/wkhtmltoimage /bin/
 COPY --from=wkhtmltopdf /bin/libwkhtmltox* /bin/
 
-# Arbetskatalog
 WORKDIR /app
 
-# Installera Python-dependencies först (bättre caching)
-COPY requirements.txt .
+COPY requirements.txt requirements.txt
+
 RUN pip install --upgrade pip \
  && pip install "wheel>=0.38.4" \
  && pip install --no-cache-dir -r requirements.txt
 
-# Kopiera in all kod
-COPY . .
 
-# Miljövariabler
-ENV PYTHONPATH=/app
+ADD ./ .
 
-# Skapa icke-root-användare
+ENV PYTHONPATH=""
+ENV PYTHONPATH="${PYTHONPATH}:/app"
+
 RUN addgroup -S solarpark-service -g 1000 \
  && adduser -S solarpark-service -u 1000 -G solarpark-service
 
 USER solarpark-service
 
-# Startkommando
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
