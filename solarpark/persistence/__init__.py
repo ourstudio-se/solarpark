@@ -211,7 +211,7 @@ def delete_all_member_data(db: Session, member_id: int):
 
     try:
         last_item = db.query(Member).order_by(Member.id.desc()).first()
-        alter_sequence_query = f"ALTER SEQUENCE members_id_seq RESTART WITH {last_item.id+1}"
+        alter_sequence_query = f"ALTER SEQUENCE members_id_seq RESTART WITH {last_item.id + 1}"
         db.execute(text(alter_sequence_query))
         db.commit()
     except Exception as ex:

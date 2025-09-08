@@ -13,6 +13,7 @@ from solarpark.persistence.error_log import create_error
 from solarpark.persistence.models.economics import Economics
 from solarpark.persistence.models.members import Member
 from solarpark.persistence.models.shares import Share
+from solarpark.settings import settings
 
 
 def get_all_shares(db: Session, sort: List, range: List) -> Dict:
@@ -67,12 +68,13 @@ def get_shares_by_member_and_purchase_year(db: Session, member_id: int, year: in
 
 
 def count_all_shares(db: Session):
-    all_shares = db.query(Share).count()
+    all_shares = db.query(Share).filter(Share.member_id != settings.SOLARPARK_MEMBER_ID).count()
     reinvested_shares = db.query(Share).filter(Share.from_internal_account == True).count()  # noqa: E712
     org_more_than_one_share = (
         db.query(Member)
         .join(Share, Member.id == Share.member_id)
         .filter(Member.org_name != None)  # noqa: E711
+        .filter(Member.id != settings.SOLARPARK_MEMBER_ID)
         .group_by(Member.id)
         .having(func.count(Share.id) > 1)
         .count()
@@ -86,6 +88,7 @@ def all_members_with_shares(db: Session):
         db.query(Member)
         .join(Share, Member.id == Share.member_id)
         .filter(Member.org_name != None)  # noqa: E711
+        .filter(Member.id != settings.SOLARPARK_MEMBER_ID)
         .group_by(Member.id)
         .having(func.count(Share.id) > 0)
         .count()
@@ -95,6 +98,7 @@ def all_members_with_shares(db: Session):
         db.query(Member)
         .join(Share, Member.id == Share.member_id)
         .group_by(Member.id)
+        .filter(Member.id != settings.SOLARPARK_MEMBER_ID)
         .having(func.count(Share.id) > 0)
         .count()
     )
@@ -159,6 +163,9 @@ def update_share(db: Session, share_id: int, share_update: ShareUpdateRequest):
         total_investment = sum(share.initial_value for share in shares["data"])
         current_value = sum(share.current_value for share in shares["data"])
 
+        if member_id == settings.SOLARPARK_MEMBER_ID:
+            continue
+
         member = get_economics_by_member(db, member_id)["data"][0]
         member_economics_request = EconomicsUpdateRequest(
             nr_of_shares=nr_of_shares,
@@ -217,7 +224,7 @@ def delete_share(db: Session, share_id: int):
 
     try:
         last_item = db.query(Share).order_by(Share.id.desc()).first()
-        alter_sequence_query = f"ALTER SEQUENCE shares_id_seq RESTART WITH {last_item.id+1}"
+        alter_sequence_query = f"ALTER SEQUENCE shares_id_seq RESTART WITH {last_item.id + 1}"
         db.execute(text(alter_sequence_query))
         db.commit()
     except Exception as ex:

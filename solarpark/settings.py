@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     SHARE_PRICE: int = 3000
     ALLOW_ORIGINS: str
     ECONOMICS_BACKGROUND_BATCH: int = 20
+    SOLARPARK_MEMBER_ID: int = 1
 
 
 settings = Settings()
