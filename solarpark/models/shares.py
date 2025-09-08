@@ -50,7 +50,6 @@ class ShareUpdateRequest(BaseModel):
     comment: Optional[str] = None
     purchased_at: datetime
     member_id: int
-    initial_value: float
     current_value: float
     from_internal_account: bool
 
