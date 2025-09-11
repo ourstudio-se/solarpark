@@ -1,4 +1,3 @@
-import io
 import os
 from datetime import datetime
 
@@ -7,13 +6,13 @@ from jinja2 import Environment, FileSystemLoader
 from sqlalchemy.orm import Session
 
 from solarpark.api.generate import generate_certificate_pdf
-from solarpark.models.email import Attachment, Email
+from solarpark.models.eemail import Attachment, Email
 from solarpark.persistence.database import get_db
+from solarpark.persistence.economics import get_economics_by_member
 from solarpark.persistence.members import get_member
 from solarpark.persistence.shares import get_shares_by_member
-from solarpark.services import sendgrid_client
-from solarpark.services.sendgrid import SendGridClient
-from solarpark.settings import settings
+from solarpark.services import loopia_client
+from solarpark.services.loopia import LoopiaEmailClient
 
 router = APIRouter()
 
@@ -23,8 +22,8 @@ def get_image_path():
     return path
 
 
-def send_certificate_with_sendgrid(
-    sendgrid: SendGridClient,
+def send_certificate_with_loopia(
+    loopia: LoopiaEmailClient,
     db: Session,
     member_id: int,
 ):
@@ -32,12 +31,17 @@ def send_certificate_with_sendgrid(
     if len(members["data"]) != 1:
         raise HTTPException(status_code=400, detail="member not found")
 
+    economics = get_economics_by_member(db, member_id)
+    if not len(economics["data"]) > 0:
+        raise HTTPException(status_code=400, detail="no economics found for member")
+
     shares = get_shares_by_member(db, member_id)
     if not len(shares["data"]) > 0:
         raise HTTPException(status_code=400, detail="no shares found for member")
 
     member = members["data"][0]
     shares = shares["data"]
+    economics = economics["data"][0]
 
     if member.email is None:
         raise HTTPException(status_code=400, detail="member has no email")
@@ -58,16 +62,15 @@ def send_certificate_with_sendgrid(
     pdf = generate_certificate_pdf(member, shares)
 
     mail = Email(
+        to_email="simon@ourstudio.se",
         subject="Andelsbevis Solar Park",
-        to_emails=[member.email],
-        from_email=settings.SENDGRID_EMAIL_FROM,
         html_content=html_mail,
         attachments=[
-            Attachment(file_content=io.BytesIO(pdf), file_name="andelsbevis.pdf", file_type="application/pdf")
+            Attachment(file_content=pdf, file_name="andelsbevis.pdf", sub_type="pdf", main_type="application")
         ],
     )
 
-    sendgrid.send(mail)
+    loopia.send(mail)
 
 
 @router.post(
@@ -77,8 +80,8 @@ def send_certificate_with_sendgrid(
 )
 async def send_certificate(
     member_id: int,
-    sendgrid: SendGridClient = Depends(sendgrid_client),
+    loopia: LoopiaEmailClient = Depends(loopia_client),
     db: Session = Depends(get_db),
     background_tasks: BackgroundTasks = BackgroundTasks(),
 ):
-    background_tasks.add_task(send_certificate_with_sendgrid, sendgrid, db, member_id)
+    background_tasks.add_task(send_certificate_with_loopia, loopia, db, member_id)

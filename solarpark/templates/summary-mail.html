@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="sv">
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="x-ua-compatible" content="ie=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{{ title }}</title>
+	</head>
+	<body
+		style="margin: 0; padding: 0; background: #f2f4f7; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%"
+	>
+		<!-- Preheader (skjult) -->
+		<div
+			style="
+				display: none;
+				font-size: 1px;
+				line-height: 1px;
+				max-height: 0;
+				max-width: 0;
+				opacity: 0;
+				overflow: hidden;
+			"
+		>
+			Din uppdatering från Solar Park
+		</div>
+
+		<!-- Outer wrapper -->
+		<table
+			role="presentation"
+			cellpadding="0"
+			cellspacing="0"
+			border="0"
+			align="center"
+			width="100%"
+			style="background: #f2f4f7"
+		>
+			<tr>
+				<td align="center" style="padding: 24px 12px">
+					<!-- Container (max 600px), enkel tabell-layout för brett klientstöd -->
+					<table
+						role="presentation"
+						cellpadding="0"
+						cellspacing="0"
+						border="0"
+						width="100%"
+						style="
+							max-width: 600px;
+							background: #ffffff;
+							border-collapse: collapse;
+							border: 1px solid #eaecf0;
+						"
+					>
+						<!-- Header -->
+						<tr>
+							<td align="center" style="background: #4fc4be; padding: 16px 20px">
+								<h1
+									style="
+										margin: 0;
+										font-family: Arial, Helvetica, sans-serif;
+										font-size: 20px;
+										line-height: 24px;
+										color: #0c3234;
+									"
+								>
+									{{ title }}
+								</h1>
+							</td>
+						</tr>
+
+						<!-- Greeting / intro -->
+						<tr>
+							<td style="padding: 18px 20px 6px 20px">
+								<p
+									style="
+										margin: 0;
+										font-family: Arial, Helvetica, sans-serif;
+										font-size: 16px;
+										line-height: 22px;
+										color: #101828;
+									"
+								>
+									Hej {{ name }}!
+								</p>
+								<p
+									style="
+										margin: 8px 0 0 0;
+										font-family: Arial, Helvetica, sans-serif;
+										font-size: 14px;
+										line-height: 21px;
+										color: #475467;
+									"
+								>
+									Här är en översikt över dina ekonomiuppgifter för <strong>Solar Park</strong>.
+								</p>
+							</td>
+						</tr>
+
+						<!-- Economics table (enkel, lättläst) -->
+						<tr>
+							<td style="padding: 8px 12px 16px 12px">
+								<table
+									role="presentation"
+									cellpadding="0"
+									cellspacing="0"
+									border="0"
+									width="100%"
+									style="border-collapse: collapse"
+								>
+									<!-- Rad -->
+									<tr>
+										<td
+											style="
+												width: 50%;
+												padding: 10px 8px;
+												border-bottom: 1px solid #f2f4f7;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 13px;
+												color: #667085;
+											"
+										>
+											Antal andelar
+										</td>
+										<td
+											align="right"
+											style="
+												width: 50%;
+												padding: 10px 8px;
+												border-bottom: 1px solid #f2f4f7;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 15px;
+												color: #101828;
+											"
+										>
+											{{ economics.nr_of_shares or 0 }}
+										</td>
+									</tr>
+									<tr>
+										<td
+											style="
+												padding: 10px 8px;
+												border-bottom: 1px solid #f2f4f7;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 13px;
+												color: #667085;
+											"
+										>
+											Total investering
+										</td>
+										<td
+											align="right"
+											style="
+												padding: 10px 8px;
+												border-bottom: 1px solid #f2f4f7;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 15px;
+												color: #101828;
+											"
+										>
+											{{ economics.total_investment }}
+										</td>
+									</tr>
+									<tr>
+										<td
+											style="
+												padding: 10px 8px;
+												border-bottom: 1px solid #f2f4f7;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 13px;
+												color: #667085;
+											"
+										>
+											Nuvarande värde
+										</td>
+										<td
+											align="right"
+											style="
+												padding: 10px 8px;
+												border-bottom: 1px solid #f2f4f7;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 15px;
+												color: #101828;
+											"
+										>
+											{{ economics.current_value }}
+										</td>
+									</tr>
+									<tr>
+										<td
+											style="
+												padding: 10px 8px;
+												border-bottom: 1px solid #f2f4f7;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 13px;
+												color: #667085;
+											"
+										>
+											Återinvesterat
+										</td>
+										<td
+											align="right"
+											style="
+												padding: 10px 8px;
+												border-bottom: 1px solid #f2f4f7;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 15px;
+												color: #101828;
+											"
+										>
+											{{ economics.reinvested }}
+										</td>
+									</tr>
+									<tr>
+										<td
+											style="
+												padding: 10px 8px;
+												border-bottom: 1px solid #f2f4f7;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 13px;
+												color: #667085;
+											"
+										>
+											Kontosaldo
+										</td>
+										<td
+											align="right"
+											style="
+												padding: 10px 8px;
+												border-bottom: 1px solid #f2f4f7;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 15px;
+												color: #101828;
+											"
+										>
+											{{ economics.account_balance }}
+										</td>
+									</tr>
+									<tr>
+										<td
+											style="
+												padding: 10px 8px;
+												border-bottom: 1px solid #f2f4f7;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 13px;
+												color: #667085;
+											"
+										>
+											Utbetalt
+										</td>
+										<td
+											align="right"
+											style="
+												padding: 10px 8px;
+												border-bottom: 1px solid #f2f4f7;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 15px;
+												color: #101828;
+											"
+										>
+											{{ economics.disbursed }}
+										</td>
+									</tr>
+									<tr>
+										<td
+											style="
+												padding: 10px 8px;
+												border-bottom: 1px solid #f2f4f7;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 13px;
+												color: #667085;
+											"
+										>
+											Senaste utdelningsår
+										</td>
+										<td
+											align="right"
+											style="
+												padding: 10px 8px;
+												border-bottom: 1px solid #f2f4f7;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 15px;
+												color: #101828;
+											"
+										>
+											{{ economics.last_dividend_year }}
+										</td>
+									</tr>
+									<tr>
+										<td
+											style="
+												padding: 10px 8px;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 13px;
+												color: #667085;
+											"
+										>
+											Senaste utdelning
+										</td>
+										<td
+											align="right"
+											style="
+												padding: 10px 8px;
+												font-family: Arial, Helvetica, sans-serif;
+												font-size: 15px;
+												color: #101828;
+											"
+										>
+											{% if economics.issued_dividend %}{{ economics.issued_dividend |
+											date("%Y-%m-%d") }}{% else %}–{% endif %}
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+
+						<!-- Utdelningsinställning -->
+						<tr>
+							<td style="padding: 0 20px 12px 20px">
+								<p
+									style="
+										margin: 0;
+										font-family: Arial, Helvetica, sans-serif;
+										font-size: 14px;
+										line-height: 20px;
+										color: #344054;
+									"
+								>
+									<strong>Utdelningsinställning:</strong>
+									{% if economics.pay_out %}Utdelningar betalas ut till ditt konto.{% else
+									%}Utdelningar återinvesteras automatiskt.{% endif %}
+								</p>
+							</td>
+						</tr>
+
+						<!-- CTA (enkel länk, funkar överallt) -->
+						<tr>
+							<td align="center" style="padding: 16px 20px 20px 20px">
+								<a
+									href="https://solarpark.se/"
+									target="_blank"
+									style="
+										display: inline-block;
+										padding: 10px 16px;
+										background: #4fc4be;
+										color: #0c3234;
+										text-decoration: none;
+										font-family: Arial, Helvetica, sans-serif;
+										font-size: 15px;
+										border-radius: 4px;
+									"
+									>Besök solarpark.se</a
+								>
+							</td>
+						</tr>
+
+						<!-- Footer -->
+						<tr>
+							<td align="center" style="padding: 0 20px 20px 20px">
+								<p
+									style="
+										margin: 0;
+										font-family: Arial, Helvetica, sans-serif;
+										font-size: 12px;
+										line-height: 18px;
+										color: #98a2b3;
+									"
+								>
+									Detta meddelande skickades automatiskt. Svara inte på detta mejl.
+								</p>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>
+
+<!-- Noter:
+- Endast inline CSS, enkel tabell-layout, inga media queries, ingen VML/MSO.
+- Byt till valutafilter i din Jinja-env om du vill: {{ economics.current_value | sek }} osv.
+- Datumformat via Jinja's |date("%Y-%m-%d").
+-->

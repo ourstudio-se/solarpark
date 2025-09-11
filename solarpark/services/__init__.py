@@ -1,5 +1,5 @@
-from solarpark.services.sendgrid import SendGridClient
+from solarpark.services.loopia import LoopiaEmailClient
 
 
-def sendgrid_client() -> SendGridClient:
-    return SendGridClient()
+def loopia_client() -> LoopiaEmailClient:
+    return LoopiaEmailClient()
