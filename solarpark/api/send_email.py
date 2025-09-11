@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from jinja2 import Environment, FileSystemLoader
@@ -15,6 +14,13 @@ from solarpark.services import loopia_client
 from solarpark.services.loopia import LoopiaEmailClient
 
 router = APIRouter()
+
+
+def sek(value) -> str:
+    try:
+        return f"{float(value):,.0f} kr".replace(",", " ")
+    except (TypeError, ValueError):
+        return "–"
 
 
 def get_image_path():
@@ -50,13 +56,24 @@ def send_certificate_with_loopia(
         "title": "Andelsbevis Solar Park",
         "id": member.id,
         "name": f"{member.firstname} {member.lastname}" if member.lastname is not None else member.org_name,
-        "shares": [{"id": share.id, "purchased_at": share.purchased_at.strftime("%Y-%m-%d")} for share in shares],
+        "economics": {
+            "nr_of_shares": economics.nr_of_shares,
+            "total_investment": economics.total_investment,
+            "current_value": economics.current_value,
+            "reinvested": economics.reinvested,
+            "account_balance": economics.account_balance,
+            "pay_out": bool(economics.pay_out),
+            "disbursed": economics.disbursed,
+            "last_dividend_year": economics.last_dividend_year,
+            "issued_dividend": economics.issued_dividend,  # lämna som datetime eller None
+        },
         "image_path": get_image_path(),
-        "today": datetime.today().strftime("%Y-%m-%d"),
     }
 
     env = Environment(loader=FileSystemLoader("solarpark/templates/"))
-    template_email = env.get_template("email.html")
+    template_email = env.get_template("summary.html")
+
+    env.filters["sek"] = sek
 
     html_mail = template_email.render(context)
     pdf = generate_certificate_pdf(member, shares)

@@ -36,7 +36,7 @@
 		>
 			<tr>
 				<td align="center" style="padding: 24px 12px">
-					<!-- Container (max 600px), enkel tabell-layout för brett klientstöd -->
+					<!-- Container -->
 					<table
 						role="presentation"
 						cellpadding="0"
@@ -67,7 +67,7 @@
 							</td>
 						</tr>
 
-						<!-- Greeting / intro -->
+						<!-- Intro -->
 						<tr>
 							<td style="padding: 18px 20px 6px 20px">
 								<p
@@ -95,7 +95,7 @@
 							</td>
 						</tr>
 
-						<!-- Economics table (enkel, lättläst) -->
+						<!-- Economics -->
 						<tr>
 							<td style="padding: 8px 12px 16px 12px">
 								<table
@@ -106,7 +106,6 @@
 									width="100%"
 									style="border-collapse: collapse"
 								>
-									<!-- Rad -->
 									<tr>
 										<td
 											style="
@@ -304,8 +303,8 @@
 												color: #101828;
 											"
 										>
-											{% if economics.issued_dividend %}{{ economics.issued_dividend |
-											date("%Y-%m-%d") }}{% else %}–{% endif %}
+											{% if economics.issued_dividend %}{{
+											economics.issued_dividend.strftime('%Y-%m-%d') }}{% else %}–{% endif %}
 										</td>
 									</tr>
 								</table>
@@ -331,7 +330,7 @@
 							</td>
 						</tr>
 
-						<!-- CTA (enkel länk, funkar överallt) -->
+						<!-- CTA -->
 						<tr>
 							<td align="center" style="padding: 16px 20px 20px 20px">
 								<a
@@ -374,9 +373,3 @@
 		</table>
 	</body>
 </html>
-
-<!-- Noter:
-- Endast inline CSS, enkel tabell-layout, inga media queries, ingen VML/MSO.
-- Byt till valutafilter i din Jinja-env om du vill: {{ economics.current_value | sek }} osv.
-- Datumformat via Jinja's |date("%Y-%m-%d").
--->
