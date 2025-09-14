@@ -9,22 +9,6 @@
 	<body
 		style="margin: 0; padding: 0; background: #f2f4f7; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%"
 	>
-		<!-- Preheader (skjult) -->
-		<div
-			style="
-				display: none;
-				font-size: 1px;
-				line-height: 1px;
-				max-height: 0;
-				max-width: 0;
-				opacity: 0;
-				overflow: hidden;
-			"
-		>
-			Din uppdatering från Solar Park
-		</div>
-
-		<!-- Outer wrapper -->
 		<table
 			role="presentation"
 			cellpadding="0"
@@ -90,7 +74,7 @@
 										color: #475467;
 									"
 								>
-									Här är en översikt över dina ekonomiuppgifter för <strong>Solar Park</strong>.
+									Här är en översikt över ditt medlemskap.
 								</p>
 							</td>
 						</tr>
@@ -156,56 +140,6 @@
 											"
 										>
 											{{ economics.total_investment }}
-										</td>
-									</tr>
-									<tr>
-										<td
-											style="
-												padding: 10px 8px;
-												border-bottom: 1px solid #f2f4f7;
-												font-family: Arial, Helvetica, sans-serif;
-												font-size: 13px;
-												color: #667085;
-											"
-										>
-											Nuvarande värde
-										</td>
-										<td
-											align="right"
-											style="
-												padding: 10px 8px;
-												border-bottom: 1px solid #f2f4f7;
-												font-family: Arial, Helvetica, sans-serif;
-												font-size: 15px;
-												color: #101828;
-											"
-										>
-											{{ economics.current_value }}
-										</td>
-									</tr>
-									<tr>
-										<td
-											style="
-												padding: 10px 8px;
-												border-bottom: 1px solid #f2f4f7;
-												font-family: Arial, Helvetica, sans-serif;
-												font-size: 13px;
-												color: #667085;
-											"
-										>
-											Återinvesterat
-										</td>
-										<td
-											align="right"
-											style="
-												padding: 10px 8px;
-												border-bottom: 1px solid #f2f4f7;
-												font-family: Arial, Helvetica, sans-serif;
-												font-size: 15px;
-												color: #101828;
-											"
-										>
-											{{ economics.reinvested }}
 										</td>
 									</tr>
 									<tr>
@@ -324,7 +258,7 @@
 									"
 								>
 									<strong>Utdelningsinställning:</strong>
-									{% if economics.pay_out %}Utdelningar betalas ut till ditt konto.{% else
+									{% if economics.pay_out %}Utdelningar betalas ut till ditt privata konto.{% else
 									%}Utdelningar återinvesteras automatiskt.{% endif %}
 								</p>
 							</td>

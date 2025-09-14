@@ -84,7 +84,7 @@ async def create_share_endpoint(share_request: ShareCreateRequest, db: Session =
 
 
 @router.put("/shares/{share_id}", summary="Update share")
-async def update_member_endpoint(
+async def update_share_endpoint(
     share_id: int, share_request: ShareUpdateRequest, db: Session = Depends(get_db)
 ) -> SingleShare:
     try:

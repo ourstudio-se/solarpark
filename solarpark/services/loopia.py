@@ -4,7 +4,7 @@ from email.message import EmailMessage
 
 from structlog import get_logger
 
-from solarpark.models.eemail import Email
+from solarpark.models.email import Email
 from solarpark.settings import settings
 
 
@@ -16,9 +16,13 @@ class LoopiaEmailClient:
         self.port = settings.LOOPIA_PORT
 
     def send(self, email: Email):
+        if settings.MAIL_TEST_MODE:
+            get_logger().info(f"Test mode enabled, email not sent to {email.to_email} subject {email.subject}")
+            return
+
         msg = EmailMessage()
         msg["From"] = self.email
-        msg["To"] = "simon@ourstudio.se"  # TODOemail.to_email
+        msg["To"] = email.to_email
         msg["Subject"] = email.subject
         msg.set_content(email.html_content, subtype="html")
         if email.attachments:

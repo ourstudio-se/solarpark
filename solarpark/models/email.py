@@ -6,12 +6,12 @@ from pydantic import BaseModel
 class Attachment(BaseModel):
     file_content: Any
     file_name: str
-    file_type: str
+    sub_type: str
+    main_type: str
 
 
 class Email(BaseModel):
-    from_email: str
-    to_emails: list[str]
+    to_email: str
     subject: str
     html_content: str
     attachments: Optional[list[Attachment]] = None

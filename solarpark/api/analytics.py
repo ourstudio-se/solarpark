@@ -16,7 +16,9 @@ router = APIRouter()
 async def get_analytics_endpoint(db: Session = Depends(get_db)):
     try:
         all_members, all_member_organizations = all_members_with_shares(db)
-        all_shares_solarpark_excluded, reinvested_shares, org_more_than_one_share = count_all_shares(db)
+        all_shares_solarpark_excluded, all_solarpark_shares, reinvested_shares, org_more_than_one_share = (
+            count_all_shares(db)
+        )
         total_account_balance = get_total_account_balance(db)
         total_disbursed = get_total_disbursed(db)
         year_payments = get_year_payments(db)
@@ -32,6 +34,7 @@ async def get_analytics_endpoint(db: Session = Depends(get_db)):
             },
             "shares": {
                 "total_count": all_shares_solarpark_excluded,
+                "total_count_solarpark_shares": all_solarpark_shares,
                 "reinvested_count": reinvested_shares,
                 "org_more_than_one_share": org_more_than_one_share,
                 "average_share_count_per_member": round(all_shares_solarpark_excluded / all_members),
