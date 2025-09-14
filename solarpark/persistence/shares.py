@@ -69,6 +69,7 @@ def get_shares_by_member_and_purchase_year(db: Session, member_id: int, year: in
 
 def count_all_shares(db: Session):
     all_shares = db.query(Share).filter(Share.member_id != settings.SOLARPARK_MEMBER_ID).count()
+    all_solarpark_shares = db.query(Share).filter(Share.member_id == settings.SOLARPARK_MEMBER_ID).count()
     reinvested_shares = db.query(Share).filter(Share.from_internal_account == True).count()  # noqa: E712
     org_more_than_one_share = (
         db.query(Member)
@@ -80,7 +81,7 @@ def count_all_shares(db: Session):
         .count()
     )
 
-    return all_shares, reinvested_shares, org_more_than_one_share
+    return all_shares, all_solarpark_shares, reinvested_shares, org_more_than_one_share
 
 
 def all_members_with_shares(db: Session):
@@ -175,6 +176,8 @@ def update_share(db: Session, share_id: int, share_update: ShareUpdateRequest):
             account_balance=member.account_balance,
             pay_out=member.pay_out,
             disbursed=member.disbursed,
+            last_dividend_year=member.last_dividend_year,
+            issued_dividend=member.issued_dividend,
         )
         update_economics(db, member.id, member_economics_request)
 
