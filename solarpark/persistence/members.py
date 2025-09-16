@@ -1,5 +1,5 @@
 # pylint: disable=singleton-comparison,W0622
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from sqlalchemy import and_, text
 from sqlalchemy.orm import Session
@@ -41,6 +41,11 @@ def get_member_by_list_ids(db: Session, member_ids: list):
     return {"data": result, "total": len(result)}
 
 
+def get_all_member_ids_and_emails(db: Session) -> List[Tuple[int, str]]:
+    results = db.query(Member.id, Member.email).all()
+    return [(row.id, row.email) for row in results]
+
+
 def get_all_members(db: Session, sort: List, range: List) -> Dict:
     total_count = db.query(Member).count()
 
@@ -61,7 +66,7 @@ def get_all_members(db: Session, sort: List, range: List) -> Dict:
             "data": db.query(Member).order_by(Member.id).offset(range[0]).limit(range[1]).all(),
             "total": total_count,
         }
-    # "data": db.query(Member).order_by(Member.id).offset(0).limit(10).all()
+
     return {
         "data": db.query(Member).order_by(Member.id).offset(0).limit(10).all(),
         "total": total_count,
