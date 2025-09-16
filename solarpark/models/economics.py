@@ -47,8 +47,8 @@ class EconomicsCreateRequest(BaseModel):
 
 
 class EconomicsUpdateRequest(BaseModel):
-    nr_of_shares: Optional[int] = 0
-    total_investment: Optional[float] = 0
+    nr_of_shares: int
+    total_investment: int
     current_value: Optional[float] = 0
     reinvested: Optional[float] = 0
     account_balance: Optional[float] = 0
