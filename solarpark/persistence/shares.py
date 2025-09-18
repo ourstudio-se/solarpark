@@ -210,7 +210,6 @@ def delete_share(db: Session, share_id: int):
     )
 
     db.query(Economics).filter(Economics.id == member["data"][0].id).update(economics_update.model_dump())
-    db.flush()
 
     try:
         db.commit()

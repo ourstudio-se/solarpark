@@ -2,14 +2,15 @@
 
 from datetime import date, datetime, timezone
 
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 from structlog import get_logger
 
 from solarpark.models.dividends import DividendUpdateRequest
 from solarpark.models.economics import EconomicsUpdateRequest
 from solarpark.models.error_log import ErrorLogCreateRequest
 from solarpark.models.shares import ShareUpdateRequest
+from solarpark.persistence.database import SessionLocal
 from solarpark.persistence.economics import get_all_economics_dividend
 from solarpark.persistence.error_log import create_error
 from solarpark.persistence.models.dividends import Dividend
@@ -21,175 +22,144 @@ from solarpark.persistence.shares import get_shares_by_member
 from solarpark.settings import settings
 
 
-def make_dividend(
-    db: Session, amount: float, payment_year: int, nr_of_economics: int, is_historical_fulfillment: bool = False
-):
-    engine = create_engine(f"{settings.CONNECTIONSTRING_DB}")
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    db_error = SessionLocal()
+def make_dividend(amount: float, payment_year: int, nr_of_economics: int, is_historical_fulfillment: bool = False):
+    db: Session = SessionLocal()
+    try:
+        batch_size = settings.ECONOMICS_BACKGROUND_BATCH
+        for i in range(0, nr_of_economics, batch_size):
 
-    batch_size = settings.ECONOMICS_BACKGROUND_BATCH
-    for i in range(0, nr_of_economics, batch_size):
-        try:
-            members_economics = get_all_economics_dividend(db, range=[i, batch_size])
-        except Exception as ex:
-            get_logger().error(ex)
-
-        if not members_economics or not members_economics["data"]:
-            error_request = ErrorLogCreateRequest(
-                comment=f"Error: no dividends done for members in batch {i}, {members_economics['data']}, {members_economics}",
-                resolved=False,
-            )
-            create_error(db_error, error_request)
-            continue
-
-        for member in members_economics["data"]:
-            if member.last_dividend_year >= payment_year:
-                continue
-
-            shares = get_shares_by_member(db, member.member_id)
-
-            if not shares["total"] or not shares["data"]:
+            members_economics_batch = get_all_economics_dividend(db, range=[i, batch_size])
+            if not members_economics_batch or not members_economics_batch["data"]:
                 error_request = ErrorLogCreateRequest(
-                    member_id=member.member_id,
-                    comment="Error: no shares found, no dividends done",
+                    comment=f"Error: no dividends done for members in batch {i}, {members_economics_batch['data']}, {members_economics_batch}",
                     resolved=False,
                 )
-                create_error(db_error, error_request)
+                create_error(db, error_request)
+
                 continue
 
-            for share in shares["data"]:
-                if share.purchased_at.year >= payment_year:
+            for member_economics in members_economics_batch["data"]:
+                if member_economics.last_dividend_year >= payment_year:
+                    get_logger().info(
+                        f"Skipping member {member_economics.member_id}, dividend already done for year {payment_year}"
+                    )
+
                     continue
 
-                current_value = max(share.current_value - amount, 0)
-
-                share_update = ShareUpdateRequest(
-                    comment=share.comment,
-                    purchased_at=share.purchased_at,
-                    member_id=share.member_id,
-                    initial_value=share.initial_value,
-                    current_value=current_value,
-                    from_internal_account=share.from_internal_account,
-                )
-
-                db.query(Share).filter(Share.id == share.id).update(share_update.model_dump())
-                db.flush()
-
-            nr_of_shares = shares["total"]
-            total_investment = sum(share.initial_value for share in shares["data"])
-            current_value = sum(share.current_value for share in shares["data"])
-            dividend = amount * sum(1 for share in shares["data"] if share.purchased_at.year < payment_year)
-
-            account_balance = dividend + member.account_balance
-            disbursed = member.disbursed
-            reinvested = member.reinvested
-
-            if member.pay_out:
-                disbursed = dividend + disbursed + member.account_balance
-                account_balance = 0
-
-                payment = Payment(
-                    member_id=member.member_id,
-                    year=datetime.now().year,
-                    amount=(dividend + member.account_balance),
-                    paid_out=False,
-                )
-                db.add(payment)
-                db.flush()
-
-            economics_update = EconomicsUpdateRequest(
-                nr_of_shares=nr_of_shares,
-                total_investment=total_investment,
-                current_value=current_value,
-                reinvested=reinvested,
-                account_balance=account_balance,
-                pay_out=member.pay_out,
-                disbursed=disbursed,
-                last_dividend_year=payment_year,
-                issued_dividend=datetime.now(timezone.utc),
-            )
-
-            db.query(Economics).filter(Economics.id == member.id).update(economics_update.model_dump())
-            db.flush()
-
-            # Should we reinvest and create new shares or not
-            nr_reinvest_shares = int(member.account_balance // settings.SHARE_PRICE)
-            account_balance = account_balance - nr_reinvest_shares * settings.SHARE_PRICE
-            disbursed = disbursed
-            reinvested = reinvested + nr_reinvest_shares * settings.SHARE_PRICE
-
-            if not is_historical_fulfillment and nr_reinvest_shares > 0:
-                nr_of_shares = nr_of_shares + nr_reinvest_shares
-                total_investment = total_investment + nr_reinvest_shares * settings.SHARE_PRICE
-                current_value = current_value + nr_reinvest_shares * settings.SHARE_PRICE
-
-                for _ in range(nr_reinvest_shares):
-                    share = Share(
-                        member_id=member.member_id,
-                        initial_value=settings.SHARE_PRICE,
-                        current_value=settings.SHARE_PRICE,
-                        purchased_at=date((datetime.now().year - 1), 12, 31),
-                        from_internal_account=True,
+                shares = get_shares_by_member(db, member_economics.member_id)
+                if not shares["total"] or not shares["data"]:
+                    error_request = ErrorLogCreateRequest(
+                        member_id=member_economics.member_id,
+                        comment="Error: no shares found, no dividends done",
+                        resolved=False,
                     )
-                    db.add(share)
-                    db.flush()
+                    create_error(db, error_request)
+
+                    continue
+
+                current_nr_of_shares = shares["total"]
+                current_disbursed = member_economics.disbursed
+                current_reinvested = member_economics.reinvested
+                current_total_investment = sum(share.initial_value for share in shares["data"])
+
+                new_dividend = amount * sum(1 for share in shares["data"] if share.purchased_at.year < payment_year)
+                new_account_balance = new_dividend + member_economics.account_balance
+
+                new_disbursed = current_disbursed
+                if member_economics.pay_out:
+                    new_disbursed = current_disbursed + new_account_balance
+
+                    payment = Payment(
+                        member_id=member_economics.member_id,
+                        year=datetime.now().year,
+                        amount=new_account_balance,
+                        paid_out=False,
+                    )
+
+                    new_account_balance = 0
+                    db.add(payment)
+
+                nr_of_shares_to_reinvest = int(new_account_balance // settings.SHARE_PRICE)
+                new_account_balance_after_reinvestment = (
+                    new_account_balance - nr_of_shares_to_reinvest * settings.SHARE_PRICE
+                )
+                new_current_reinvested = current_reinvested + nr_of_shares_to_reinvest * settings.SHARE_PRICE
+                new_total_investment = current_total_investment + nr_of_shares_to_reinvest * settings.SHARE_PRICE
+                new_total_current_value_of_shares = update_shares_for_dividend(db, shares, payment_year, amount)
 
                 economics_update = EconomicsUpdateRequest(
-                    nr_of_shares=nr_of_shares,
-                    total_investment=total_investment,
-                    current_value=current_value,
-                    reinvested=reinvested,
-                    account_balance=account_balance,
-                    pay_out=member.pay_out,
-                    disbursed=disbursed,
+                    nr_of_shares=current_nr_of_shares + nr_of_shares_to_reinvest,
+                    total_investment=new_total_investment,
+                    current_value=new_total_current_value_of_shares,
+                    reinvested=new_current_reinvested,
+                    account_balance=new_account_balance_after_reinvestment,
+                    pay_out=member_economics.pay_out,
+                    disbursed=new_disbursed,
                     last_dividend_year=payment_year,
                     issued_dividend=datetime.now(timezone.utc),
                 )
 
-                db.query(Economics).filter(Economics.id == member.id).update(economics_update.model_dump())
-                db.flush()
+                db.query(Economics).filter(Economics.id == member_economics.id).update(economics_update.model_dump())
 
-            # Handle case for import of historic data
-            if is_historical_fulfillment:
-                economics_update = EconomicsUpdateRequest(
-                    nr_of_shares=nr_of_shares,
-                    total_investment=total_investment,
-                    current_value=current_value,
-                    reinvested=reinvested,
-                    account_balance=account_balance,
-                    pay_out=member.pay_out,
-                    disbursed=disbursed,
-                    last_dividend_year=payment_year,
-                    issued_dividend=datetime.now(timezone.utc),
-                )
+                if not is_historical_fulfillment and nr_of_shares_to_reinvest > 0:
+                    for _ in range(nr_of_shares_to_reinvest):
+                        share = Share(
+                            member_id=member_economics.member_id,
+                            initial_value=settings.SHARE_PRICE,
+                            current_value=settings.SHARE_PRICE,
+                            purchased_at=date((datetime.now().year - 1), 12, 31),
+                            from_internal_account=True,
+                        )
+                        db.add(share)
 
-                db.query(Economics).filter(Economics.id == member.id).update(economics_update.model_dump())
-                db.flush()
+                try:
+                    db.commit()
+                    get_logger().info(f"committed dividend for member {member_economics.member_id} successfully")
+                except Exception as ex:
+                    db.rollback()
+                    get_logger().error(
+                        f"failed to commit dividend for member {member_economics.member_id}, details: {ex}"
+                    )
+                    error_request = ErrorLogCreateRequest(
+                        member_id=member_economics.member_id,
+                        comment=f"Error: no dividend done, details: {ex}",
+                        resolved=False,
+                    )
+                    create_error(db, error_request)
 
-            try:
-                db.commit()
-            except Exception as ex:
-                db.rollback()
-                error_request = ErrorLogCreateRequest(
-                    member_id=member.member_id,
-                    comment=f"Error: no dividend done, details: {ex}",
-                    resolved=False,
-                )
-                create_error(db_error, error_request)
+        dividend_update = DividendUpdateRequest(dividend_per_share=amount, payment_year=payment_year, completed=True)
+        db.query(Dividend).filter(Dividend.payment_year == payment_year).update(dividend_update.model_dump())
+        db.commit()
+        get_logger().info(f"fulfilled dividend {payment_year} successfully")
 
-    dividend_update = DividendUpdateRequest(dividend_per_share=amount, payment_year=payment_year, completed=True)
-    db.query(Dividend).filter(Dividend.payment_year == payment_year).update(dividend_update.model_dump())
-    db.commit()
+    finally:
+        db.close()
 
-    db_error.close()
-    get_logger().info(f"fulfilled dividend {payment_year} successfully")
+
+def update_shares_for_dividend(db: Session, shares, payment_year: int, amount: float) -> int:
+    new_total_current_value_of_share = 0
+    for share in shares["data"]:
+        if share.purchased_at.year >= payment_year:
+            new_total_current_value_of_share += share.current_value
+            continue
+
+        new_current_value = max(share.current_value - amount, 0)
+        new_total_current_value_of_share += new_current_value
+
+        share_update = ShareUpdateRequest(
+            comment=share.comment,
+            purchased_at=share.purchased_at,
+            member_id=share.member_id,
+            initial_value=share.initial_value,
+            current_value=new_current_value,
+            from_internal_account=share.from_internal_account,
+        )
+        db.query(Share).filter(Share.id == share.id).update(share_update.model_dump())
+
+    return new_total_current_value_of_share
 
 
 def delete_all_member_data(db: Session, member_id: int):
-    engine = create_engine(f"{settings.CONNECTIONSTRING_DB}")
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    db_error = SessionLocal()
 
     member = db.query(Member).filter(Member.id == member_id).first()
 
@@ -206,7 +176,7 @@ def delete_all_member_data(db: Session, member_id: int):
             comment=f"Error: no member deleted: {ex}",
             resolved=False,
         )
-        create_error(db_error, error_request)
+        create_error(db, error_request)
         return False
 
     try:
@@ -215,6 +185,7 @@ def delete_all_member_data(db: Session, member_id: int):
         db.execute(text(alter_sequence_query))
         db.commit()
     except Exception as ex:
+        db.rollback()
         error_request = ErrorLogCreateRequest(
             member_id=member_id,
             comment=f"Error resetting member sequence after deletion of member {member_id}, details: {ex}",

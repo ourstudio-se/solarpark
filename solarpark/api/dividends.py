@@ -152,7 +152,7 @@ async def make_dividend_endpoint(
         raise HTTPException(status_code=400, detail="economics not found")
 
     background_tasks.add_task(
-        make_dividend, db, amount, payment_year, nr_of_economics, is_historical_fulfillment=is_historical_fulfillment
+        make_dividend, amount, payment_year, nr_of_economics, is_historical_fulfillment=is_historical_fulfillment
     )
 
     return {"message": "dividend started in the background"}
