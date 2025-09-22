@@ -71,8 +71,7 @@ def make_dividend(amount: float, payment_year: int, nr_of_economics: int, is_his
 
                     payment = Payment(
                         member_id=member_economics.member_id,
-                        year=payment_year
-                        + 1,  # datetime.now().year, # ÄNDARA HÄR OCH KÖR OM JUST NU och ta bort sen fwemfoiawemfioawefoå
+                        year=datetime.now().year,
                         amount=new_account_balance,
                         paid_out=False,
                     )
@@ -112,7 +111,7 @@ def make_dividend(amount: float, payment_year: int, nr_of_economics: int, is_his
                             member_id=member_economics.member_id,
                             initial_value=settings.SHARE_PRICE,
                             current_value=settings.SHARE_PRICE,
-                            purchased_at=date((payment_year), 12, 31),  # date((datetime.now().year - 1), 12, 31),
+                            purchased_at=date((datetime.now().year - 1), 12, 31),
                             from_internal_account=True,
                         )
                         db.add(share)

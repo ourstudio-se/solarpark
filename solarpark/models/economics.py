@@ -7,14 +7,14 @@ from pydantic import BaseModel, ConfigDict
 class EconomicsMember(BaseModel):
     id: int
     member_id: int
-    nr_of_shares: Optional[int] = 0
-    total_investment: Optional[float] = 0
-    current_value: Optional[float] = 0
-    reinvested: Optional[float] = 0
-    account_balance: Optional[float] = 0
+    nr_of_shares: int
+    total_investment: float
+    current_value: float
+    reinvested: Optional[float]
+    account_balance: float
     pay_out: bool
-    disbursed: Optional[float] = 0
-    last_dividend_year: Optional[int] = 0
+    disbursed: Optional[float]
+    last_dividend_year: Optional[int]
     issued_dividend: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)

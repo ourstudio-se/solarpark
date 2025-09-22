@@ -70,6 +70,7 @@ def create_economics_for_all_members(db: Session):
                             account_balance=0,
                             reinvested=0,
                             last_dividend_year=0,
+                            disbursed=0,
                             pay_out=False,
                         ),
                     )
