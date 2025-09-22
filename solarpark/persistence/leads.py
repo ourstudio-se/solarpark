@@ -121,6 +121,9 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
         delete_lead(db, lead_id)
         return True
 
+    if lead.quantity_shares < 1:
+        return False
+
     existing_member_id = lead.existing_id
     if existing_member_id:
 
@@ -156,6 +159,7 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
             send_summary_and_certificate_with_loopia(loopia_client(), db, existing_member_id)
 
         delete_lead(db, lead_id)
+
         return True
 
     member_request = MemberCreateRequest(
@@ -189,6 +193,7 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
         current_value=lead.quantity_shares * settings.SHARE_PRICE,
         reinvested=0,
         account_balance=0,
+        last_dividend_year=0,
         pay_out=False,
         disbursed=0,
     )

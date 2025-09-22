@@ -8,8 +8,10 @@ from structlog import get_logger
 
 from solarpark.api.generate import generate_certificate_pdf
 from solarpark.models.email import Attachment, Email
-from solarpark.persistence.database import get_db
+from solarpark.models.error_log import ErrorLogCreateRequest
+from solarpark.persistence.database import SessionLocal, get_db
 from solarpark.persistence.economics import get_economics_by_member
+from solarpark.persistence.error_log import create_error
 from solarpark.persistence.members import get_all_member_ids_and_emails, get_member
 from solarpark.persistence.shares import get_shares_by_member
 from solarpark.services import loopia_client
@@ -98,20 +100,29 @@ def send_summary_and_certificate_with_loopia(
 
 def send_bulk_summary_and_certificate_with_loopia(
     loopia: LoopiaEmailClient,
-    db: Session,
 ):
-    rate_limit_seconds = 20
-    members = get_all_member_ids_and_emails(db)
-    for member_id, email in members:
-        if email is None or email == "":
-            continue
+    db: Session = SessionLocal()
+    try:
+        rate_limit_seconds = 20
+        members = get_all_member_ids_and_emails(db)
+        for member_id, email in members:
+            if email is None or email == "":
+                continue
 
-        try:
-            send_summary_and_certificate_with_loopia(loopia, db, member_id)
-        except Exception as e:
-            get_logger().error(f"Bulk run: not sending email for member {member_id}: {e}")
+            try:
+                send_summary_and_certificate_with_loopia(loopia, db, member_id)
+            except Exception as e:
+                get_logger().error(f"Bulk run: not sending email for member {member_id}: {e}")
+                error_request = ErrorLogCreateRequest(
+                    member_id=member_id,
+                    comment=f"Error: no sending email to member {member_id}, details: {e}",
+                    resolved=False,
+                )
+                create_error(db, error_request)
 
-        time.sleep(rate_limit_seconds)
+            time.sleep(rate_limit_seconds)
+    finally:
+        db.close()
 
 
 @router.post(
@@ -135,7 +146,7 @@ async def send_email_with_certificate(
 )
 async def send_email_summation_bulk_run(
     loopia: LoopiaEmailClient = Depends(loopia_client),
-    db: Session = Depends(get_db),
     background_tasks: BackgroundTasks = BackgroundTasks(),
 ):
-    background_tasks.add_task(send_bulk_summary_and_certificate_with_loopia, loopia, db)
+    background_tasks.add_task(send_bulk_summary_and_certificate_with_loopia, loopia)
+    return {"message": "email sending started in the background"}

@@ -68,8 +68,6 @@ def create_error(db: Session, error_request: ErrorLogCreateRequest):
     )
     db.add(error)
     db.commit()
-    db.refresh(error)
-    return error
 
 
 def get_all_unresolved_errors(db: Session):
