@@ -121,6 +121,9 @@ def approve_lead(db: Session, lead_id: int, approved: bool, comment: str):
         delete_lead(db, lead_id)
         return True
 
+    if lead.quantity_shares < 1:
+        return False
+
     existing_member_id = lead.existing_id
     if existing_member_id:
 

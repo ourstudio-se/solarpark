@@ -147,6 +147,7 @@ def create_share(db: Session, share_request: ShareCreateRequest):
 
 
 def update_share(db: Session, share_id: int, share_update: ShareUpdateRequest):
+
     share_before_update = get_share(db, share_id)
 
     if share_before_update["data"][0].member_id == share_update.member_id:

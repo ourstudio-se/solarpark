@@ -71,7 +71,8 @@ def make_dividend(amount: float, payment_year: int, nr_of_economics: int, is_his
 
                     payment = Payment(
                         member_id=member_economics.member_id,
-                        year=datetime.now().year,
+                        year=payment_year
+                        + 1,  # datetime.now().year, # ÄNDARA HÄR OCH KÖR OM JUST NU och ta bort sen fwemfoiawemfioawefoå
                         amount=new_account_balance,
                         paid_out=False,
                     )
@@ -85,12 +86,16 @@ def make_dividend(amount: float, payment_year: int, nr_of_economics: int, is_his
                 )
                 new_current_reinvested = current_reinvested + nr_of_shares_to_reinvest * settings.SHARE_PRICE
                 new_total_investment = current_total_investment + nr_of_shares_to_reinvest * settings.SHARE_PRICE
-                new_total_current_value_of_shares = update_shares_for_dividend(db, shares, payment_year, amount)
+
+                new_total_current_value_of_share = update_shares_for_dividend(db, shares, payment_year, amount)
+                new_total_current_value_of_shares_with_reinvested_shares = (
+                    new_total_current_value_of_share + nr_of_shares_to_reinvest * settings.SHARE_PRICE
+                )
 
                 economics_update = EconomicsUpdateRequest(
                     nr_of_shares=current_nr_of_shares + nr_of_shares_to_reinvest,
                     total_investment=new_total_investment,
-                    current_value=new_total_current_value_of_shares,
+                    current_value=new_total_current_value_of_shares_with_reinvested_shares,
                     reinvested=new_current_reinvested,
                     account_balance=new_account_balance_after_reinvestment,
                     pay_out=member_economics.pay_out,
@@ -107,7 +112,7 @@ def make_dividend(amount: float, payment_year: int, nr_of_economics: int, is_his
                             member_id=member_economics.member_id,
                             initial_value=settings.SHARE_PRICE,
                             current_value=settings.SHARE_PRICE,
-                            purchased_at=date((datetime.now().year - 1), 12, 31),
+                            purchased_at=date((payment_year), 12, 31),  # date((datetime.now().year - 1), 12, 31),
                             from_internal_account=True,
                         )
                         db.add(share)

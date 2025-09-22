@@ -35,24 +35,24 @@ class Economics(BaseModel):
 
 class EconomicsCreateRequest(BaseModel):
     member_id: int
-    nr_of_shares: Optional[int] = 0
-    total_investment: Optional[float] = 0
-    current_value: Optional[float] = 0
-    reinvested: Optional[float] = 0
-    account_balance: Optional[float] = 0
+    nr_of_shares: int
+    total_investment: float
+    current_value: float
+    reinvested: Optional[float]
+    account_balance: float
     pay_out: bool
-    disbursed: Optional[float] = 0
-    last_dividend_year: Optional[int] = 0
+    disbursed: Optional[float]
+    last_dividend_year: Optional[int]
     issued_dividend: Optional[datetime] = None
 
 
 class EconomicsUpdateRequest(BaseModel):
     nr_of_shares: int
-    total_investment: int
-    current_value: Optional[float] = 0
-    reinvested: Optional[float] = 0
-    account_balance: Optional[float] = 0
-    pay_out: Optional[bool]
-    disbursed: Optional[float] = 0
-    last_dividend_year: Optional[int] = 0
+    total_investment: float
+    current_value: float
+    reinvested: Optional[float]
+    account_balance: float
+    pay_out: bool
+    disbursed: Optional[float]
+    last_dividend_year: Optional[int]
     issued_dividend: Optional[datetime] = None
