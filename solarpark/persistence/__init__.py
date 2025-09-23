@@ -118,7 +118,6 @@ def make_dividend(amount: float, payment_year: int, nr_of_economics: int, is_his
 
                 try:
                     db.commit()
-                    get_logger().info(f"committed dividend for member {member_economics.member_id} successfully")
                 except Exception as ex:
                     db.rollback()
                     get_logger().error(
@@ -169,6 +168,7 @@ def delete_all_member_data(db: Session, member_id: int):
 
     db.query(Share).filter(Share.member_id == member_id).delete()
     db.query(Economics).filter(Economics.member_id == member_id).delete()
+    db.query(Payment).filter(Payment.member_id == member_id).delete()
     db.query(Member).filter(Member.id == member_id).delete()
 
     try:
@@ -184,15 +184,20 @@ def delete_all_member_data(db: Session, member_id: int):
         return False
 
     try:
-        last_item = db.query(Member).order_by(Member.id.desc()).first()
-        alter_sequence_query = f"ALTER SEQUENCE members_id_seq RESTART WITH {last_item.id + 1}"
-        db.execute(text(alter_sequence_query))
+        last_item_member = db.query(Member).order_by(Member.id.desc()).first()
+        alter_sequence_query_member = f"ALTER SEQUENCE members_id_seq RESTART WITH {last_item_member.id + 1}"
+        db.execute(text(alter_sequence_query_member))
+
+        last_item_shares = db.query(Share).order_by(Share.id.desc()).first()
+        alter_sequence_query_shares = f"ALTER SEQUENCE shares_id_seq RESTART WITH {last_item_shares.id + 1}"
+        db.execute(text(alter_sequence_query_shares))
+
         db.commit()
     except Exception as ex:
         db.rollback()
         error_request = ErrorLogCreateRequest(
             member_id=member_id,
-            comment=f"Error resetting member sequence after deletion of member {member_id}, details: {ex}",
+            comment=f"Error resetting member and shares sequence after deletion of member {member_id}, details: {ex}",
             resolved=False,
         )
         create_error(db, error_request)

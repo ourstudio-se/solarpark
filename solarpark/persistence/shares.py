@@ -1,4 +1,4 @@
-# pylint: disable=singleton-comparison,W0622
+# pylint: disable=singleton-comparison,W0622,R0911
 
 from typing import Dict, List
 
@@ -196,6 +196,22 @@ def delete_share(db: Session, share_id: int):
     if deleted != 1:
         return False
 
+    if member_id == settings.SOLARPARK_MEMBER_ID:
+        try:
+            db.commit()
+            return True
+
+        except Exception as ex:
+            db.rollback()
+            error_request = ErrorLogCreateRequest(
+                share_id=share_id,
+                member_id=member_id,
+                comment=f"Error: no deleting of share {share_id}, details: {ex}",
+                resolved=False,
+            )
+            create_error(db, error_request)
+            return False
+
     member = get_economics_by_member(db, member_id)
     if not member or not member["data"][0]:
         return False
@@ -208,6 +224,8 @@ def delete_share(db: Session, share_id: int):
         account_balance=member["data"][0].account_balance,
         pay_out=member["data"][0].pay_out,
         disbursed=member["data"][0].disbursed,
+        last_dividend_year=member["data"][0].last_dividend_year,
+        issued_dividend=member["data"][0].issued_dividend,
     )
 
     db.query(Economics).filter(Economics.id == member["data"][0].id).update(economics_update.model_dump())
