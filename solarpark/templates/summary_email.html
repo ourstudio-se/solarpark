@@ -127,7 +127,7 @@
 												color: #667085;
 											"
 										>
-											Total investering
+											Insats
 										</td>
 										<td
 											align="right"
@@ -152,7 +152,7 @@
 												color: #667085;
 											"
 										>
-											Kontosaldo
+											Kontosaldo (vid 3000kr så tilldelas man extra andel)
 										</td>
 										<td
 											align="right"
@@ -257,9 +257,8 @@
 										color: #344054;
 									"
 								>
-									<strong>Återbetalnings inställning:</strong>
-									{% if economics.pay_out %}Återbetalningar betalas ut till ditt privata konto.{% else
-									%}Återbetalningar återinvesteras automatiskt.{% endif %}
+									<strong>Vill ha återbetalat:</strong>
+									{% if economics.pay_out %}JA{% else %}NEJ{% endif %}
 								</p>
 							</td>
 						</tr>
