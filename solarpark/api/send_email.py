@@ -60,13 +60,14 @@ def send_summary_and_certificate_with_loopia(
         get_logger().error(f"Member id {member_id} has no email address")
         raise HTTPException(status_code=400, detail="Member has no email address")
 
+    investment_without_reinvested = economics.total_investment - economics.reinvested
     context = {
         "title": "Solar Park",
         "id": member.id,
         "name": f"{member.firstname} {member.lastname}" if member.lastname is not None else member.org_name,
         "economics": {
             "nr_of_shares": economics.nr_of_shares,
-            "total_investment": economics.total_investment,
+            "total_investment": investment_without_reinvested,
             "current_value": economics.current_value,
             "reinvested": economics.reinvested,
             "account_balance": economics.account_balance,
