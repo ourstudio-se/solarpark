@@ -1,5 +1,5 @@
-FROM surnet/alpine-wkhtmltopdf:3.22.0-0.12.6-full AS wkhtmltopdf
-FROM python:3.12-alpine3.21
+FROM surnet/alpine-wkhtmltopdf:3.23.4-0.12.6-full AS wkhtmltopdf
+FROM python:3.12-alpine3.23
 
 
 # Install dependencies
